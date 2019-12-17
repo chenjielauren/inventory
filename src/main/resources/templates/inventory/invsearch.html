@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<header th:replace="inventory/header::header-fragment"></header>
+<body class="hold-transition sidebar-mini">
+<link th:href="@{/inventory/plugins/select2/select2.css}" rel="stylesheet"/>
+<link th:href="@{/inventory/plugins/datetimepick/css/tempusdominus-bootstrap-4.css}" rel="stylesheet"/>
+<!-- <link th:href="@{/inventory/plugins/jqgrid-5.3.0/ui.jqgrid-bootstrap-ui.css}" rel="stylesheet"/> -->
+<!-- <link th:href="@{/inventory/plugins/jqgrid-5.3.0/ui.jqgrid-bootstrap.css}" rel="stylesheet"/> -->
+<!-- <link th:href="@{/inventory/plugins/jqgrid-5.3.0/ui.jqgrid-bootstrap4.css}" rel="stylesheet"/> -->
+<!-- <link th:href="@{/inventory/plugins/jqgrid-5.3.0/ui.jqgrid.css}" rel="stylesheet"/> -->
+<style>
+    .ui-jqgrid tr.jqgrow td {
+        white-space: normal !important;
+        height: auto;
+        vertical-align: text-top;
+        padding-top: 2px;
+    }
+</style>
+<div class="wrapper">
+    <!-- 引入页面头header-fragment -->
+    <div th:replace="inventory/header::header-nav"></div>
+    <!-- 引入工具栏sidebar-fragment -->
+    <div th:replace="inventory/sidebar::sidebar-fragment(${path})"></div>
+    <!-- Content Wrapper. Contains page content -->
+    <div class="content-wrapper">
+        <!-- Content Header (Page header) -->
+        <div class="content-header">
+            <div class="container-fluid">
+            </div><!-- /.container-fluid -->
+        </div>
+        <!-- Main content -->
+        <div class="content">
+            <div class="container-fluid">
+                <div class="card card-primary card-outline">
+                    <div class="card-header">
+                        <h3 class="card-title">库存查询</h3>
+                    </div> <!-- /.card-body -->
+                    <div class="card-body">
+                        <div class="grid-btn">
+                        	<label for="itemNumber" class="control-label" style="padding-top: 5px;width: 5%">部件号:</label>&nbsp;&nbsp;&nbsp;
+                        	<input class="form-control col-2" id="itemNumber" placeholder="部件号"/>&nbsp;&nbsp;&nbsp;
+                            <label for="fromInv" class="control-label" style="padding-top: 5px;width: 5%">From_Inv:</label>&nbsp;&nbsp;&nbsp;
+                            <select class="form-control select2 col-1" id="fromInv">
+                        		<option value="" selected="selected">All</option>
+							    <option th:each="code : ${codeList}" th:value="${code.id}" th:text="${code.invCode}"
+	      							></option>
+							</select>&nbsp;&nbsp;&nbsp;
+							<label for="toInv" class="control-label" style="padding-top: 5px;width: 5%">To_Inv:</label>&nbsp;&nbsp;&nbsp;
+							<select class="form-control select2 col-1" id="toInv">
+								<option value="" selected="selected">All</option>
+							    <option th:each="code : ${codeList}" th:value="${code.id}" th:text="${code.invCode}"
+	      							></option>
+							</select>&nbsp;&nbsp;&nbsp;
+							<label for="fromLoc" class="control-label" style="padding-top: 5px;width: 5%">From_Loc:</label>&nbsp;&nbsp;&nbsp;
+							<select class="form-control select2 col-1" id="fromLoc">
+								<option value="" selected="selected">All</option>
+							    <option th:each="loc : ${locList}" th:value="${loc.id}" th:text="${loc.locCode}"
+	      							></option>
+							</select>&nbsp;&nbsp;&nbsp;
+							<label for="toLoc" class="control-label" style="padding-top: 5px;width: 5%">To_Loc:</label>&nbsp;&nbsp;&nbsp;
+							<select class="form-control select2 col-1" id="toLoc">
+								<option value="" selected="selected">All</option>
+							    <option th:each="loc : ${locList}" th:value="${loc.id}" th:text="${loc.locCode}"
+	      							></option>
+							</select>&nbsp;&nbsp;&nbsp;                            
+                        </div>
+                        <div  class="grid-btn">
+                        	<label for="startDate" class="control-label" style="padding-top: 5px;width: 5%">开始日期:</label>&nbsp;&nbsp;&nbsp;
+							<input type="text" class="form-control datetimepicker-input col-2" name="startDate" id="startDate" data-toggle="datetimepicker" data-target="#startDate">&nbsp;&nbsp;&nbsp;
+							<label for="endDate" class="control-label" style="padding-top: 5px;width: 5%">结束日期:</label>&nbsp;&nbsp;&nbsp;
+							<input type="text" class="form-control datetimepicker-input col-2" name="endDate" id="endDate" data-toggle="datetimepicker" data-target="#endDate">&nbsp;&nbsp;&nbsp;                         	
+                        	<button class="btn btn-info" onclick="search()"><i
+                                    class="fa fa-search"></i>&nbsp;搜索
+                            </button> 
+                        </div>
+                        <table id="jqGrid" class="table table-bordered">
+                        </table>
+                        <div id="jqGridPager"></div>
+                    </div><!-- /.card-body -->
+                </div>
+            </div><!-- /.container-fluid -->
+        </div>
+        <!-- /.content -->
+        
+    </div>
+    <!-- /.content-wrapper -->
+    <!-- 引入页脚footer-fragment -->
+    <div th:replace="inventory/footer::footer-fragment"></div>
+</div>
+<!-- jQuery -->
+<script th:src="@{/inventory/plugins/jquery/jquery.min.js}"></script>
+<!-- jQuery UI 1.11.4 -->
+<script th:src="@{/inventory/plugins/jQueryUI/jquery-ui.min.js}"></script>
+<!-- Bootstrap 4 -->
+<script th:src="@{/inventory/plugins/bootstrap/js/bootstrap.bundle.min.js}"></script>
+<!-- AdminLTE App -->
+<script th:src="@{/inventory/dist/js/adminlte.min.js}"></script>
+<script th:src="@{/inventory/plugins/jqgrid-5.3.0/jquery.jqGrid.min.js}"></script>
+<script th:src="@{/inventory/plugins/jqgrid-5.3.0/grid.locale-cn.js}"></script>
+<!-- sweetalert -->
+<script th:src="@{/inventory/plugins/sweetalert/sweetalert.min.js}"></script>
+<!-- Select2 -->
+<script th:src="@{/inventory/plugins/select2/select2.full.min.js}"></script>
+<!-- datetime -->
+<script th:src="@{/inventory/plugins/datetimepick/js/moment.js}"></script>
+<script th:src="@{/inventory/plugins/datetimepick/js/tempusdominus-bootstrap-4.js}"></script>
+<script th:src="@{/inventory/dist/js/public.js}"></script>
+<script th:src="@{/inventory/dist/js/invsearch.js}"></script>
+</body>
+</html>

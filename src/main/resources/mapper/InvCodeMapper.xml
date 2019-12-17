@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.silgan.inventory.dao.InvCodeMapper" > 
+  <resultMap id="InvCodeMap" type="com.silgan.inventory.entity.InvCode" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="inv_code" property="invCode" jdbcType="INTEGER" />
+    <result column="inv_desc" property="invDesc" jdbcType="VARCHAR" />
+    <result column="vmi"  property="vmi" jdbcType="TINYINT"/>
+    <result column="inv_rank"  property="invRank" jdbcType="INTEGER" />
+  </resultMap>  
+  <select id="selectInvCode" resultMap="InvCodeMap" >
+    select distinct id,inv_code	
+    from tb_inv_code
+    order by inv_rank
+  </select>   
+</mapper>

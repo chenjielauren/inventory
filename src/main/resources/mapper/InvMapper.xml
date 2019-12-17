@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.silgan.inventory.dao.InvMapper" >
+  <resultMap id="BaseResultMap" type="com.silgan.inventory.entity.Inv" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="item_number" property="itemNumber" jdbcType="VARCHAR" />
+    <result column="from_inv" property="fromInv" jdbcType="VARCHAR" />
+    <result column="to_inv" property="toInv" jdbcType="VARCHAR" />
+    <result column="from_loc" property="fromLoc" jdbcType="VARCHAR" />
+    <result column="to_loc" property="toLoc" jdbcType="VARCHAR" />
+    <result column="qty" property="qty" jdbcType="INTEGER" />
+    <result column="lot_number" property="lotNumber" jdbcType="VARCHAR" />
+    <result column="inv_time" property="invTime" jdbcType="TIMESTAMP" />
+    <result column="create_user" property="createUser" jdbcType="VARCHAR" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="modify_user" property="modifyUser" jdbcType="VARCHAR" />
+    <result column="modify_time" property="modifyTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+   <sql id="Base_Column_List">
+    id, item_number, from_inv, to_inv, from_loc, to_loc, qty, lot_number, inv_time, 
+    create_user, create_time, modify_user, modify_time
+  </sql>
+  <insert id="insert" parameterType="com.silgan.inventory.entity.Inv" >
+    <selectKey resultType="java.lang.Integer" keyProperty="id" order="AFTER" >
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into tb_inv (item_number, from_inv, to_inv, 
+      from_loc, to_loc, qty, 
+      lot_number, inv_time,
+      create_user, create_time, modify_user, 
+      modify_time)
+    values (#{itemNumber,jdbcType=VARCHAR}, #{fromInv,jdbcType=VARCHAR}, #{toInv,jdbcType=VARCHAR}, 
+      #{fromLoc,jdbcType=VARCHAR}, #{toLoc,jdbcType=VARCHAR}, #{qty,jdbcType=INTEGER}, 
+      #{lotNumber,jdbcType=VARCHAR}, #{invTime,jdbcType=TIMESTAMP}, 
+      #{createUser,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP}, #{modifyUser,jdbcType=VARCHAR}, 
+      #{modifyTime,jdbcType=TIMESTAMP})
+  </insert>
+
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+	<include refid="Base_Column_List"/>
+    from tb_inv
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <select id="selectAll" resultMap="BaseResultMap" >
+    select 
+	<include refid="Base_Column_List"/>
+    from tb_inv
+  </select>
+
+  <select id="findInvList" parameterType="Map" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List"/>
+    from tb_inv where 1=1  
+     <if test="itemNumber!=null">
+         AND item_number like CONCAT('%',#{itemNumber},'%')
+    </if>    
+    <if test="fromInv!=null">
+         AND from_inv like CONCAT('%',#{fromInv},'%')
+    </if>
+    <if test="toInv!=null">
+         AND to_inv like CONCAT('%',#{toInv},'%' )
+    </if>
+    <if test="fromLoc!=null">
+         AND from_loc like CONCAT('%',#{fromLoc},'%')
+    </if>
+    <if test="toLoc!=null">
+         AND to_loc like CONCAT('%',#{toLoc},'%' )
+    </if>
+    <if test="startDate!=null">
+         AND inv_time &gt;= #{startDate}
+    </if> 
+    <if test="endDate!=null">
+         AND inv_time &lt;= #{endDate}
+    </if> 
+    order by create_time desc
+    <if test="start!=null and limit!=null">
+        limit #{start},#{limit}
+    </if>
+    
+  </select>
+  <select id="getTotalInvs" parameterType="Map" resultType="int">
+     select count(*) from tb_inv
+     where  1=1
+     <if test="itemNumber!=null">
+         AND item_number like CONCAT('%',#{itemNumber},'%')
+    </if> 
+     <if test="fromInv!=null">
+         AND from_inv like CONCAT('%',#{fromInv},'%')
+    </if>
+    <if test="toInv!=null">
+         AND to_inv like CONCAT('%',#{toInv},'%' )
+    </if>
+    <if test="fromLoc!=null">
+         AND from_loc like CONCAT('%',#{fromLoc},'%')
+    </if>
+    <if test="toLoc!=null">
+         AND to_loc like CONCAT('%',#{toLoc},'%' )
+    </if>
+     <if test="startDate!=null">
+         AND inv_time &gt;= #{startDate}
+    </if> 
+    <if test="endDate!=null">
+         AND inv_time &lt;= #{endDate}
+    </if> 
+  </select> 
+</mapper>
