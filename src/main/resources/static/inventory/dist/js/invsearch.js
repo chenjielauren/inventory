@@ -1,41 +1,62 @@
 //Initialize Select2 Elements
 $('.select2').select2();
-var invCodes = {};	
-var locs = {};
+
 $(function () {
-	//get invCodes
-	//1:RI;2:VI;3:MI	
-	$("#fromInv > option").each(function() {
-		invCodes[this.value]=this.text;
-	});
-	//get locations
-	//1:A;2:B;3:C	
-	$("#fromLoc > option").each(function() {
-		locs[this.value]=this.text;
-	});
+	//show item no
+	$('#itemNumber').inputpicker({
+		width:"500px",
+		data:JSON.parse($("#itemList").val()),
+	    fields:[
+	        {name:'itemNumber',text:'部件号'},
+	        {name:'itemDesc',text:'描述'},
+	        {name:'itemBrand',text:'品牌'},
+	        {name:'itemModel',text:'型号'}
+        ],
+	    fieldText:'itemNumber',
+	    fieldValue:'itemNumber',
+	    multiple: true,
+	    autoOpen: true,
+	    headShow:true,
+	    filterOpen :true,
+	    filterType:'start', 
+	    filterField:['itemNumber', 'itemDesc','itemBrand', 'itemModel']
+	});	
 	//startDate first day in current month
 	$('#startDate').datetimepicker({
-		format: 'YYYY-MM-DD HH:mm:ss'		
+		format: 'YYYY-MM-DD'		
 	});	
-	$('#startDate').val(moment().startOf('month').format('YYYY-MM-DD HH:mm:ss'));
+	$('#startDate').val(moment().startOf('month').format('YYYY-MM-DD'));
 	$('#endDate').datetimepicker({
-		format: 'YYYY-MM-DD HH:mm:ss'		
+		format: 'YYYY-MM-DD'		
 	});
-	$('#endDate').val(moment().format('YYYY-MM-DD HH:mm:ss'));
+	$('#endDate').val(moment().format('YYYY-MM-DD'));
+	
+	var pageWidth = $("#jqGrid").parent().width() - 100;
 	//endDate current day 
 	$("#jqGrid").jqGrid({
         datatype: "json",
         colModel: [
-            {label: '部件号', name: 'itemNumber', index: 'itemNumber', width: 50},
-            {label: 'From_Inv', name: 'fromInv', index: 'fromInv',formatter:invFmatter, width: 50},
-            {label: 'To_Inv', name: 'toInv', index: 'toInv',formatter:invFmatter,width: 50},
-            {label: 'From_Loc', name: 'fromLoc', index: 'fromLoc',formatter:locFmatter,width: 50},
-            {label: 'To_Loc', name: 'toLoc', index: 'toLoc',formatter:locFmatter, width: 50},
-            {label: '数量', name: 'qty', index: 'qty', width: 50},
-            {label: '批号', name: 'lotNumber', index: 'lotNumber', width: 50},
-            {label: '日期', name: 'invTime', index: 'invTime', width: 120}
+            {label: '部件号', name: 'itemNumber', index: 'itemNumber', width: (pageWidth*(5/100)),key:true,
+            	cellattr: function (rowId, val, rawObject, cm, rdata) {
+            		var itemTooltip = 'title="描述:'+rawObject.itemDesc+
+            		'</br>品牌:'+rawObject.itemBrand+
+            		'</br>型号:'+rawObject.itemModel+
+            		'</br>VMI:'+(rawObject.vmi?"是":"否")+
+            		'</br>安全库存数:'+rawObject.safeVmi+
+            		'</br>单位:'+rawObject.itemUnit+
+            		'</br>有效期:'+rawObject.expireDate+'"';
+            		return 'data-toggle="tooltip" data-container="body" data-html="true" data-placement="bottom"' + itemTooltip;}},
+            {label: 'From_Inv', name: 'fromInv', index: 'fromInv', width: (pageWidth*(10/100))},
+            {label: 'To_Inv', name: 'toInv', index: 'toInv',width: (pageWidth*(10/100))},
+            {label: 'From_Loc', name: 'fromLoc', index: 'fromLoc',width: (pageWidth*(10/100))},
+            {label: 'To_Loc', name: 'toLoc', index: 'toLoc', width: (pageWidth*(10/100))},
+            {label: '数量', name: 'qty', index: 'qty', width: (pageWidth*(5/100))},
+            {label: '批号', name: 'lotNumber', index: 'lotNumber', width: (pageWidth*(8/100))},
+            {label: '交易人', name: 'fullName', index: 'fullName', width: (pageWidth*(10/100))},
+            {label: '交易日期', name: 'invTime', index: 'invTime', width: (pageWidth*(8/100))},           
+            {label: '创建时间', name: 'createTime', index: 'createTime', width: (pageWidth*(10/100))}
         ],
-        height: 560,
+        height: 520,
         rowNum: 10,
         rowList: [10, 20, 50],
         styleUI: 'Bootstrap',
@@ -43,7 +64,7 @@ $(function () {
         rownumbers: false,
         rownumWidth: 20,
         autowidth: true,
-	        pager: "#jqGridPager",
+	    pager: "#jqGridPager",
         jsonReader: {
             root: "data.list",
             page: "data.currPage",
@@ -54,39 +75,19 @@ $(function () {
             page: "page",
             rows: "limit",
             order: "order",
-        },
+        },       
         gridComplete: function () {
-            //隐藏grid底部滚动条
-            $("#jqGrid").closest(".ui-jqgrid-bdiv").css({"overflow-x": "hidden"});
-//            alert($("#jqGridPager").find("span"));
+            //隐藏grid底部滚动条       	
+            $("#jqGrid").closest(".ui-jqgrid-bdiv").css({"overflow-x": "hidden"}); 
+            $('[data-toggle="tooltip"]').tooltip();
+
         }
-	});
-//	alert($("#jqGridPager").find("span").css());
-//	$("#first_jqGridPager").find("span").css("class","fa fa-step-backward");
-//	$("#prev_jqGridPager").find("span").css("class","fa fa-backward");
-//	$("#next_jqGridPager").find("span").css("class","fa fa-forward");
-//	$("#last_jqGridPager").find("span").css("class","fa fa-step-forward");
+	})	
 	
 });
-function invFmatter (cellvalue, options, rowObject)
-{
-	for (var key in invCodes) {
-	    if (key == cellvalue) {
-	        return invCodes[key];
-	    }
-	} 
-}
 
-function locFmatter (cellvalue, options, rowObject)
-{
-	for (var key in locs) {
-	    if (key == cellvalue) {
-	        return locs[key];
-	    }
-	} 
-}
 function search() {
-	var itemNumber = $('#itemNumber').val();
+	var itemNumbers = $('#itemNumber').val();
     var fromInv = $('#fromInv').val();
     var toInv = $('#toInv').val();
     var fromLoc = $('#fromLoc').val();
@@ -94,7 +95,7 @@ function search() {
     var startDate=$('#startDate').val();
     var endDate=$('#endDate').val();
     //数据封装
-    var searchData = {itemNumber: itemNumber,fromInv: fromInv,toInv: toInv,fromLoc: fromLoc,toLoc: toLoc,startDate: startDate,endDate: endDate};
+    var searchData = {itemNumbers: itemNumbers,fromInv: fromInv,toInv: toInv,fromLoc: fromLoc,toLoc: toLoc,startDate: startDate,endDate: endDate};
    
     //传入查询条件参数
     $("#jqGrid").jqGrid("setGridParam", {postData: searchData});

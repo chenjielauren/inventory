@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.silgan.inventory.dao.DcMapper" >
+  <resultMap id="BaseResultMap" type="com.silgan.inventory.entity.Dc" >
+    <id column="dc_seq" property="dcSeq" jdbcType="INTEGER" />
+    <result column="dc_code" property="dcCode" jdbcType="VARCHAR" />
+  </resultMap>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from tb_dc
+    where dc_seq = #{dcSeq,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.silgan.inventory.entity.Dc" >
+<!--     <selectKey resultType="java.lang.Integer" keyProperty="dcSeq" order="AFTER" > -->
+<!--       SELECT LAST_INSERT_ID() -->
+<!--     </selectKey> -->
+    insert into tb_dc (dc_seq,dc_code)
+    values (#{dcSeq,jdbcType=INTEGER},#{dcCode,jdbcType=VARCHAR})
+  </insert>
+  <update id="updateByPrimaryKey" parameterType="com.silgan.inventory.entity.Dc" >
+    update tb_dc
+    set dc_code = #{dcCode,jdbcType=VARCHAR}
+    where dc_seq = #{dcSeq,jdbcType=INTEGER}
+  </update>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select dc_seq, dc_code
+    from tb_dc
+    where dc_seq = #{dcSeq,jdbcType=INTEGER}
+  </select>
+  <select id="selectAll" resultMap="BaseResultMap" >
+    select dc_seq, dc_code
+    from tb_dc
+  </select>
+  <select id="selectMaxDcSeq" resultType="java.lang.Integer" parameterType="java.lang.String" >
+     select max(dc_seq) as dc_seq  from tb_dc where dc_code=#{dcCode,jdbcType=VARCHAR}
+  </select>
+</mapper>

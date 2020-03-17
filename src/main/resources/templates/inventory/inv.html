@@ -4,6 +4,7 @@
 <body class="hold-transition sidebar-mini">
 <link th:href="@{/inventory/plugins/select2/select2.css}" rel="stylesheet"/>
 <link th:href="@{/inventory/plugins/datetimepick/css/tempusdominus-bootstrap-4.css}" rel="stylesheet"/>
+<link th:href="@{/inventory/plugins/inputpick/css/jquery.inputpicker.css}" rel="stylesheet"/>
 <style>
     .ui-jqgrid tr.jqgrow td {
         white-space: normal !important;
@@ -11,6 +12,8 @@
         vertical-align: text-top;
         padding-top: 2px;
     }
+    
+    
 </style>
 <div class="wrapper">
     <!-- 引入页面头header-fragment -->
@@ -31,7 +34,7 @@
                     <div class="card-header">
                         <h3 class="card-title">库存交易</h3>
                     </div>
-                    <div class="card-body">
+                    <div class="card-body" >
                         <div class="grid-btn">
                             <button class="btn btn-info" onclick="save()">&nbsp;保存
                             </button>    
@@ -41,23 +44,27 @@
                                  	错误信息展示栏。
                              </div>
                          </div>
-	                        <table id="table" class="table table-bordered">
+                         <div class="table-responsive" style="min-height: 600px;">
+	                        <table id="table" class="table table-bordered" style="overflow-x: auto;width: 2000px;">
 	                        	<thead>
 	                        	  <tr>
-	                        	  	  <th style="width: 2%"><input type="checkbox"/></th>
-									  <th style="width: 18%">部件号</th>
-									  <th style="width: 10%">From_Inv</th>
-									  <th style="width: 10%">To_Inv</th>
-									  <th style="width: 10%">From_Loc</th>
-									  <th style="width: 10%">To_Loc</th>
-									  <th style="width: 10%">数量</th>
-									  <th style="width: 15%">批号</th>
-									  <th style="width: 15%">日期</th>
+	                        	  	  <th style="width: 20px"><!--<input type="checkbox" id="checkAll" onclick="check_uncheck_checkbox(this.checked)"/>  --></th>
+									  <th style="width: 350px">部件号</th>
+									  <th style="width: 450px">部件描述/品牌/型号</th>
+									  <th style="width: 120px">From_Inv</th>
+									  <th style="width: 120px">To_Inv</th>
+									  <th style="width: 120px">From_Loc</th>
+									  <th style="width: 120px">To_Loc</th>
+									  <th style="width: 100px">数量</th>
+									  <th style="width: 150px">批号</th>
+									  <th style="width: 200px">日期</th>
+									  <th style="width: 400px">备注</th>
 								  </tr>
 								</thead>
 								<tbody>
 							    </tbody>
 	                        </table>
+	                       </div>
                         <div>
                         	<button id="addRow"  type="button" class="btn btn-default btn-xs" aria-label="Left Align">
 							  <span class="fa fa-plus" aria-hidden="true"></span>
@@ -73,26 +80,28 @@
     	<div class="content">
             <!-- 模态框（Modal） -->
             <div class="modal fade" id="invModal"  role="dialog" aria-labelledby="invModalLabel">
-                <div class="modal-dialog modal-lg" role="document">
-                    <div class="modal-content">
+                <div class="modal-dialog modal-full" role="document">
+                    <div class="modal-content" >
                         <div class="modal-header">
                             <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
                                     aria-hidden="true">&times;</span></button>
                             <h6 class="modal-title" id="invModalLabel">Modal</h6>
                         </div>
                         <div class="modal-body">
-                            <table id="showTable" class="table">
+                            <table id="showTable" class="table" style="width: 100%">
 								  <thead>
 								    <tr>
-								      <th>ID</th>
-								      <th>部件号</th>
-									  <th>From_Inv</th>
-									  <th>To_Inv</th>
-									  <th>From_Loc</th>
-									  <th>To_Loc</th>
-									  <th>数量</th>
-									  <th>批号</th>
-									  <th>日期</th>
+								      <th style="width: 5%">ID</th>
+								      <th style="width: 10%">部件号</th>
+<!-- 								      <th style="width: 200px">部件描述/品牌/型号</th> -->
+									  <th style="width: 10%">From_Inv</th>
+									  <th style="width: 10%">To_Inv</th>
+									  <th style="width: 10%">From_Loc</th>
+									  <th style="width: 10%">To_Loc</th>
+									  <th style="width: 10%">数量</th>
+									  <th style="width: 15%">批号</th>
+									  <th style="width: 10%">日期</th>
+									  <th style="width: 20%">备注</th>
 								    </tr>
 								  </thead>
 								  <tbody>
@@ -110,12 +119,9 @@
         </div>
     </div>
     <!-- /.content-wrapper -->
-    <select class="form-control select2"  id="fromInv" style="display: none;">
-	    <option th:each="code : ${codeList}" th:value="${code.id}" th:text="${code.invCode}"></option>
-	</select>   
-	<select class="form-control select2" id="fromLoc"  style="display: none;">
-    	<option th:each="loc : ${locList}" th:value="${loc.id}" th:text="${loc.locCode}"></option>
-	</select>
+    <input  id="itemList" style="display: none;" th:value="${itemList}">
+    <input  id="invList" style="display: none;" th:value="${invList}">
+   	<input  id="locList" style="display: none;" th:value="${locList}">
 	
     <!-- 引入页脚footer-fragment -->
     <div th:replace="inventory/footer::footer-fragment"></div>
@@ -124,6 +130,7 @@
 <script th:src="@{/inventory/plugins/jquery/jquery.min.js}"></script>
 <!-- jQuery UI 1.11.4 -->
 <script th:src="@{/inventory/plugins/jQueryUI/jquery-ui.min.js}"></script>
+<script th:src="@{/inventory/plugins/inputpick/js/jquery.inputpicker.js}"></script>
 <!-- Bootstrap 4 -->
 <script th:src="@{/inventory/plugins/bootstrap/js/bootstrap.bundle.min.js}"></script>
 <!-- AdminLTE App -->

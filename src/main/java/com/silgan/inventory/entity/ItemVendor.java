@@ -1,55 +1,26 @@
 package com.silgan.inventory.entity;
 
-import java.util.Date;
-
 public class ItemVendor {
-    private Integer vendorId;
+    private Integer itemNumber;
 
-    private String vendorName;
+    private String vendId;
 
-    private String vendorPn;
+	public Integer getItemNumber() {
+		return itemNumber;
+	}
 
-    private Integer vendorRank;
+	public void setItemNumber(Integer itemNumber) {
+		this.itemNumber = itemNumber;
+	}
 
-    private Date createTime;
+	public String getVendId() {
+		return vendId;
+	}
 
-    public Integer getVendorId() {
-        return vendorId;
-    }
+	public void setVendId(String vendId) {
+		this.vendId = vendId;
+	}
 
-    public void setVendorId(Integer vendorId) {
-        this.vendorId = vendorId;
-    }
-
-    public String getVendorName() {
-        return vendorName;
-    }
-
-    public void setVendorName(String vendorName) {
-        this.vendorName = vendorName;
-    }
-
-    public String getVendorPn() {
-        return vendorPn;
-    }
-
-    public void setVendorPn(String vendorPn) {
-        this.vendorPn = vendorPn;
-    }
-
-    public Integer getVendorRank() {
-        return vendorRank;
-    }
-
-    public void setVendorRank(Integer vendorRank) {
-        this.vendorRank = vendorRank;
-    }
-
-    public Date getCreateTime() {
-        return createTime;
-    }
-
-    public void setCreateTime(Date createTime) {
-        this.createTime = createTime;
-    }
+	
+    
 }

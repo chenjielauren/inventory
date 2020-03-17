@@ -13,12 +13,39 @@
     <result column="inv_time" property="invTime" jdbcType="TIMESTAMP" />
     <result column="create_user" property="createUser" jdbcType="VARCHAR" />
     <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
-    <result column="modify_user" property="modifyUser" jdbcType="VARCHAR" />
-    <result column="modify_time" property="modifyTime" jdbcType="TIMESTAMP" />
+    <result column="note" property="note" jdbcType="VARCHAR" />
+    <result column="ic_number" property="icNumber" jdbcType="VARCHAR" />
+    <result column="price" property="price" jdbcType="DECIMAL" />
+    <result column="amount" property="amount" jdbcType="DECIMAL" />
   </resultMap>
+  <resultMap id="InvResultMap" type="com.silgan.inventory.vo.InvListVO" >
+    <result column="item_number" property="itemNumber" jdbcType="VARCHAR" />
+    <result column="item_desc" property="itemDesc" jdbcType="VARCHAR" />
+    <result column="from_inv" property="fromInv" jdbcType="VARCHAR" />
+    <result column="to_inv" property="toInv" jdbcType="VARCHAR" />
+    <result column="from_loc" property="fromLoc" jdbcType="VARCHAR" />
+    <result column="to_loc" property="toLoc" jdbcType="VARCHAR" />
+    <result column="trans_key" property="transKey" jdbcType="VARCHAR" />
+    <result column="qty" property="qty" jdbcType="INTEGER" />
+    <result column="lot_number" property="lotNumber" jdbcType="VARCHAR" />
+    <result column="inv_time" property="invTime" jdbcType="TIMESTAMP" />
+    <result column="create_user" property="createUser" jdbcType="VARCHAR" />
+    <result column="full_name" property="fullName" jdbcType="VARCHAR" />
+    <result column="vend_name" property="vendorName" jdbcType="VARCHAR" />
+    <result column="vmi_inv" property="vmiInv" jdbcType="VARCHAR" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="ic_number" property="icNumber" jdbcType="VARCHAR" />
+    <result column="price" property="price" jdbcType="DECIMAL" />
+    <result column="amount" property="amount" jdbcType="DECIMAL" />
+  </resultMap>
+  
    <sql id="Base_Column_List">
-    id, item_number, from_inv, to_inv, from_loc, to_loc, qty, lot_number, inv_time, 
-    create_user, create_time, modify_user, modify_time
+    id, item_number, from_inv, to_inv, from_loc, to_loc, qty, lot_number, inv_time,
+    create_user, create_time,note,ic_number,price,amount
+  </sql>
+   <sql id="Inv_Column_List">
+    item.item_number,item.item_desc, from_inv, to_inv, from_loc, to_loc, qty, lot_number, inv_time,
+    inv.create_user, inv.create_time,note,ic_number,price,amount
   </sql>
   <insert id="insert" parameterType="com.silgan.inventory.entity.Inv" >
     <selectKey resultType="java.lang.Integer" keyProperty="id" order="AFTER" >
@@ -27,13 +54,12 @@
     insert into tb_inv (item_number, from_inv, to_inv, 
       from_loc, to_loc, qty, 
       lot_number, inv_time,
-      create_user, create_time, modify_user, 
-      modify_time)
+      create_user, create_time, note,ic_number,price,amount)
     values (#{itemNumber,jdbcType=VARCHAR}, #{fromInv,jdbcType=VARCHAR}, #{toInv,jdbcType=VARCHAR}, 
       #{fromLoc,jdbcType=VARCHAR}, #{toLoc,jdbcType=VARCHAR}, #{qty,jdbcType=INTEGER}, 
-      #{lotNumber,jdbcType=VARCHAR}, #{invTime,jdbcType=TIMESTAMP}, 
-      #{createUser,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP}, #{modifyUser,jdbcType=VARCHAR}, 
-      #{modifyTime,jdbcType=TIMESTAMP})
+      #{lotNumber,jdbcType=VARCHAR}, #{invTime,jdbcType=TIMESTAMP},
+      #{createUser,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP}, #{note,jdbcType=VARCHAR}, #{icNumber,jdbcType=VARCHAR},
+      #{price,jdbcType=DECIMAL},#{amount,jdbcType=DECIMAL})
   </insert>
 
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
@@ -42,66 +68,175 @@
     from tb_inv
     where id = #{id,jdbcType=INTEGER}
   </select>
-  <select id="selectAll" resultMap="BaseResultMap" >
+  <select id="selectLocByMap" resultMap="BaseResultMap" parameterType="Map" >
     select 
 	<include refid="Base_Column_List"/>
-    from tb_inv
+    from tb_inv as inv where to_loc is not null
+     <if test="itemNumber!=null and itemNumber!=''">
+         AND item_number = #{itemNumber,jdbcType=VARCHAR}
+    </if>  
+    <if test="itemNumbers!=null">
+        AND item_number in
+        <foreach collection="itemNumbers" item="itemNumber" separator=","
+            open="(" close=")">
+            #{itemNumber}
+        </foreach>
+    </if>
   </select>
-
-  <select id="findInvList" parameterType="Map" resultMap="BaseResultMap">
-    select 
-    <include refid="Base_Column_List"/>
-    from tb_inv where 1=1  
-     <if test="itemNumber!=null">
-         AND item_number like CONCAT('%',#{itemNumber},'%')
+  <select id="findInvList" parameterType="Map" resultMap="InvResultMap">
+    select id, item_number, from_inv, to_inv, from_loc, to_loc, qty, lot_number, inv_time,
+    create_user, create_time,note,ic_number,price,amount,full_Name
+    from tb_inv left join (select distinct user_name, role_name,full_name from tb_userrole) u on create_user=user_name   where 1=1
+     <if test="itemNumber!=null and itemNumber!=''">
+         AND item_number CONCAT('%',#{itemNumber},'%')
     </if>    
-    <if test="fromInv!=null">
+    <if test="fromInv!=null and fromInv!=''">
          AND from_inv like CONCAT('%',#{fromInv},'%')
     </if>
-    <if test="toInv!=null">
+    <if test="toInv!=null and toInv!=''">
          AND to_inv like CONCAT('%',#{toInv},'%' )
     </if>
-    <if test="fromLoc!=null">
+    <if test="fromLoc!=null and fromLoc!=''">
          AND from_loc like CONCAT('%',#{fromLoc},'%')
     </if>
-    <if test="toLoc!=null">
+    <if test="toLoc!=null and toLoc!=''">
          AND to_loc like CONCAT('%',#{toLoc},'%' )
     </if>
     <if test="startDate!=null">
-         AND inv_time &gt;= #{startDate}
+         AND SUBSTR(inv_time,1,10) &gt;= #{startDate}
     </if> 
     <if test="endDate!=null">
-         AND inv_time &lt;= #{endDate}
+         AND SUBSTR(inv_time,1,10) &lt;= #{endDate}
+    </if>
+    <if test="itemNumbers!=null">
+        AND item_number in
+        <foreach collection="itemNumbers" item="itemNumber" separator=","
+            open="(" close=")">
+            #{itemNumber}
+        </foreach>
+    </if>  
+    <if test="icNumber!=null and icNumber!=''">
+         AND ic_number like CONCAT('%',#{icNumber},'%')
     </if> 
-    order by create_time desc
+     <choose>
+	    <when test="sidx == 'item_number'">
+	      order by item_number desc, id desc
+	    </when>
+	    <otherwise>
+	      order by id desc
+	    </otherwise>
+	</choose>
     <if test="start!=null and limit!=null">
         limit #{start},#{limit}
     </if>
     
   </select>
   <select id="getTotalInvs" parameterType="Map" resultType="int">
-     select count(*) from tb_inv
-     where  1=1
-     <if test="itemNumber!=null">
-         AND item_number like CONCAT('%',#{itemNumber},'%')
-    </if> 
-     <if test="fromInv!=null">
+     select count(*) from tb_inv   where 1=1
+     <if test="itemNumber!=null and itemNumber!=''">
+         AND item_number CONCAT('%',#{itemNumber},'%')
+    </if>    
+    <if test="fromInv!=null and fromInv!=''">
          AND from_inv like CONCAT('%',#{fromInv},'%')
     </if>
-    <if test="toInv!=null">
+    <if test="toInv!=null and toInv!=''">
          AND to_inv like CONCAT('%',#{toInv},'%' )
     </if>
-    <if test="fromLoc!=null">
+    <if test="fromLoc!=null and fromLoc!=''">
          AND from_loc like CONCAT('%',#{fromLoc},'%')
     </if>
-    <if test="toLoc!=null">
+    <if test="toLoc!=null and toLoc!=''">
          AND to_loc like CONCAT('%',#{toLoc},'%' )
     </if>
-     <if test="startDate!=null">
-         AND inv_time &gt;= #{startDate}
+    <if test="startDate!=null">
+         AND SUBSTR(inv_time,1,10) &gt;= #{startDate}
     </if> 
     <if test="endDate!=null">
-         AND inv_time &lt;= #{endDate}
+         AND SUBSTR(inv_time,1,10) &lt;= #{endDate}
+    </if>
+    <if test="itemNumbers!=null">
+        and item_number in
+        <foreach collection="itemNumbers" item="itemNumber" separator=","
+            open="(" close=")">
+            #{itemNumber}
+        </foreach>
     </if> 
+    <if test="icNumber!=null and icNumber!=''">
+         AND ic_number like CONCAT('%',#{icNumber},'%')
+    </if>    
+  </select>   
+
+  <select id="findInvListByItemNumbers" resultMap="InvResultMap">
+    select item.item_number,item.item_desc,CONCAT(from_inv,to_inv) as trans_key,inv.qty
+	from tb_item item left join tb_inv inv  on inv.item_number = item.item_number 
+    <if test="array!=null">
+        where item.item_number in
+        <foreach item="itemNumber" collection="array" open="(" separator="," close=")">
+         #{itemNumber}
+     	</foreach>
+     </if>  
+		order by item.item_number  
+  </select> 
+
+  <select id="getCurrentQty" resultMap="InvResultMap"  parameterType="Map">
+    select inv.item_number,CONCAT(from_inv,to_inv) as trans_key,inv.qty
+	from tb_inv inv where 1 = 1
+	<if test="itemNumber!=null and itemNumber!=''">
+	 and item_number = #{itemNumber}  
+	</if>
+	<if test="vmiInv!=null and vmiInv!=''">
+	 and (from_inv = #{vmiInv} or to_inv = #{vmiInv})  
+	</if>
+	<if test="array!=null">
+        and item.item_number in
+        <foreach item="itemNumber" collection="array" open="(" separator="," close=")">
+         #{itemNumber}
+     	</foreach>
+     </if> 
+     <if test="itemNumbers!=null">
+        and item_number in
+        <foreach collection="itemNumbers" item="itemNumber" separator=","
+            open="(" close=")">
+            #{itemNumber}
+        </foreach>
+    </if>  
+    order by inv_time
+  </select>   
+  
+  <select id="findVmiInvList" parameterType="Map" resultMap="InvResultMap">
+    select distinct ic_number,to_inv,create_time,create_user,full_name,vend_name,vmi_inv 
+    from tb_inv left join (select distinct user_name, role_name,full_name from tb_userrole) u on create_user=user_name left join tb_vendor on to_inv=vmi_inv where ic_number !='' and to_inv in ('VG','VM')
+    <if test="icNumber!=null and icNumber != ''">
+         AND ic_number like CONCAT('%',#{icNumber},'%')
+    </if>    
+    <if test="toInv!=null and toInv != ''">
+         AND to_inv like CONCAT('%',#{toInv},'%')
+    </if>   
+    <if test="startDate!=null">
+         AND SUBSTR(inv_time,1,10) &gt;= #{startDate}
+    </if> 
+    <if test="endDate!=null">
+         AND SUBSTR(inv_time,1,10) &lt;= #{endDate}
+    </if>    
+    order by ic_number desc
+    <if test="start!=null and limit!=null">
+        limit #{start},#{limit}
+    </if>    
+  </select>
+  <select id="getTotalVmiInvs" parameterType="Map" resultType="int">
+   with vmi_table as(select distinct ic_number,to_inv,create_time,create_user from tb_inv where ic_number !='' and to_inv in ('VG','VM')
+    <if test="icNumber!=null and icNumber != ''">
+         AND ic_number like CONCAT('%',#{icNumber},'%')
+    </if>    
+    <if test="toInv!=null and toInv != ''">
+         AND to_inv like CONCAT('%',#{toInv},'%')
+    </if>   
+    <if test="startDate!=null">
+         AND SUBSTR(inv_time,1,10) &gt;= #{startDate}
+    </if> 
+    <if test="endDate!=null">
+         AND SUBSTR(inv_time,1,10) &lt;= #{endDate}
+    </if>    
+    order by ic_number desc)select count(*) from vmi_table    
   </select> 
 </mapper>

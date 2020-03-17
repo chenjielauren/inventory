@@ -1,5 +1,6 @@
 package com.silgan.inventory.entity;
 
+import java.math.BigDecimal;
 import java.util.Date;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -21,7 +22,7 @@ public class Inv {
 
     private String lotNumber;
 
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private Date invTime;
 
     private String createUser;
@@ -29,10 +30,13 @@ public class Inv {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date createTime;
 
-    private String modifyUser;
+    private String note;
 
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-    private Date modifyTime;
+    private String icNumber;
+    
+    private BigDecimal price;
+    
+    private BigDecimal amount;
 
     public Integer getId() {
         return id;
@@ -97,8 +101,8 @@ public class Inv {
     public void setLotNumber(String lotNumber) {
         this.lotNumber = lotNumber;
     }
-
-    public Date getInvTime() {
+    
+	public Date getInvTime() {
         return invTime;
     }
 
@@ -122,19 +126,37 @@ public class Inv {
         this.createTime = createTime;
     }
 
-    public String getModifyUser() {
-        return modifyUser;
-    }
+	public String getNote() {
+		return note;
+	}
 
-    public void setModifyUser(String modifyUser) {
-        this.modifyUser = modifyUser;
-    }
+	public void setNote(String note) {
+		this.note = note;
+	}
 
-    public Date getModifyTime() {
-        return modifyTime;
-    }
+	public String getIcNumber() {
+		return icNumber;
+	}
 
-    public void setModifyTime(Date modifyTime) {
-        this.modifyTime = modifyTime;
-    }
+	public void setIcNumber(String icNumber) {
+		this.icNumber = icNumber;
+	}
+
+	public BigDecimal getPrice() {
+		return price;
+	}
+
+	public void setPrice(BigDecimal price) {
+		this.price = price;
+	}
+
+	public BigDecimal getAmount() {
+		return amount;
+	}
+
+	public void setAmount(BigDecimal amount) {
+		this.amount = amount;
+	}
+
+    
 }

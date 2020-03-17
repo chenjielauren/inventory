@@ -2,15 +2,30 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.silgan.inventory.dao.InvCodeMapper" > 
   <resultMap id="InvCodeMap" type="com.silgan.inventory.entity.InvCode" >
-    <id column="id" property="id" jdbcType="INTEGER" />
-    <result column="inv_code" property="invCode" jdbcType="INTEGER" />
+    <id column="inv_code" property="invCode" jdbcType="INTEGER" />
     <result column="inv_desc" property="invDesc" jdbcType="VARCHAR" />
     <result column="vmi"  property="vmi" jdbcType="TINYINT"/>
     <result column="inv_rank"  property="invRank" jdbcType="INTEGER" />
   </resultMap>  
   <select id="selectInvCode" resultMap="InvCodeMap" >
-    select distinct id,inv_code	
-    from tb_inv_code
+    select distinct inv_code,inv_desc	
+    from tb_inv_code 
     order by inv_rank
-  </select>   
+  </select>
+  <select id="selectInvCodeByVmi" parameterType="Map" resultMap="InvCodeMap" >
+    select distinct inv_code,inv_desc	
+    from tb_inv_code where 1 = 1
+    <if test="vmi!=null and vmi!=''">
+         and vmi = #{vmi}
+    </if>
+    order by inv_rank
+  </select>
+   <select id="selectTransCode" parameterType="Map" resultMap="InvCodeMap" >
+    select  to_inv as inv_code,inv_desc
+	from tb_trans_code left join tb_inv_code on to_inv = inv_code
+	<if test="fromInv!=null and fromInv!=''">
+         where from_Inv = #{fromInv}
+    </if>	 
+	order by to_inv
+  </select>    
 </mapper>

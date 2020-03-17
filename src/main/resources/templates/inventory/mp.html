@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<header th:replace="inventory/header::header-fragment"></header>
+<body class="hold-transition sidebar-mini">
+<link th:href="@{/inventory/plugins/select2/select2.css}" rel="stylesheet"/>
+<link th:href="@{/inventory/plugins/datetimepick/css/tempusdominus-bootstrap-4.css}" rel="stylesheet"/>
+<link th:href="@{/inventory/plugins/inputpick/css/jquery.inputpicker.css}" rel="stylesheet"/>
+
+<style>
+    .ui-jqgrid tr.jqgrow td {
+        white-space: normal !important;
+        height: auto;
+        vertical-align: text-top;
+        padding-top: 2px;
+    }
+
+tr .spnTooltip {
+    z-index:10;display:none; padding:14px 20px;
+    margin-top:-30px; margin-left:28px;
+    width:400px; line-height:16px;
+}
+td:hover .spnTooltip{
+    display:inline; position:absolute; color:#111;
+    border:1px solid #DCA; background:#fffAF0;}
+.callout {z-index:20;position:absolute;top:30px;border:0;left:-12px;}
+
+
+    
+</style>
+<div class="wrapper">
+    <!-- 引入页面头header-fragment -->
+    <div th:replace="inventory/header::header-nav"></div>
+    <!-- 引入工具栏sidebar-fragment -->
+    <div th:replace="inventory/sidebar::sidebar-fragment(${path})"></div>
+    <!-- Content Wrapper. Contains page content -->
+    <div class="content-wrapper">
+        <!-- Content Header (Page header) -->
+        <div class="content-header">
+            <div class="container-fluid">
+            </div><!-- /.container-fluid -->
+        </div>
+        <!-- Main content -->
+        <div class="content">
+            <div class="container-fluid">
+                <div class="card card-primary card-outline">
+                    <div class="card-header">
+                        <h3 class="card-title">领料计划</h3>
+                    </div> <!-- /.card-body -->
+                    <div class="card-body">
+                        
+						<div th:fragment="side-fragment" class="col am-u-lg-6 am-u-sm-12 am-u-lg-offset-0 am-u-sm-offset-0 sidebar-container" style="min-height: 600px;">
+							<section>
+					            <div class="sidebar-header">
+					                <span class="sidebar-header-title">
+					                    	未完成预约
+					                </span>
+					                <button type="button" class="btn btn-default" onclick="addNewMp()" style="float:right"><span class="fa fa-plus"></span>&nbsp;&nbsp;新增预约</button>
+					            </div>
+					            <div class="tags" id="tagsDiv">
+					            	<table id="mpGrid" class="table table-bordered" style="width:50%">
+	                       			 </table>
+	                       			 <div id="mpGridPager"></div>
+					            </div>
+					        </section>
+					  	</div>
+					  	<div th:fragment="side-fragment" class="col am-u-lg-6 am-u-sm-12 am-u-lg-offset-0 am-u-sm-offset-0 sidebar-container" style="min-height: 600px;">						
+					  </div>						
+                    </div><!-- /.card-body -->
+                </div>
+            </div><!-- /.container-fluid -->
+        </div>
+    
+    	<div class="content">
+            <!-- 模态框（Modal） -->
+            <div class="modal fade" id="mpModal"  role="dialog" aria-labelledby="itemModalLabel">
+                <div class="modal-dialog  modal-mp" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+				          <h4 class="modal-title">查看预约</h4>
+				          <button type="button" class="close" data-dismiss="modal">&times;</button>
+				        </div>
+                        <div class="modal-body">
+				            	<div class="grid-btn">
+		                        	<label for="itemNumber" class="control-label col-2" style="padding-top: 5px;width: 5%">选择部件号:</label>
+		                        	<input class="form-control" id="itemNumber" type="text"  style="width: 400px"/>&nbsp;&nbsp;&nbsp;							
+									<table id="showQty" style="margin-top: -5px">
+											<thead>
+				                        	  <tr>
+				                        	  	<th><span class="badge badge-primary">当前库存数</span></th>
+											  	<th></th>
+											  	<th><span class="badge badge-info">已预约数</span></th>
+											  	<th></th>
+											  	<th><span class="badge badge-success">可预约数</span></th>
+											  	</tr>
+											</thead>
+											<tbody>
+											<tr style="text-align:center;">
+											  <td></td>
+											  <td><label class="control-label">-</label></td>
+											  <td></td>
+											  <td><label class="control-label">=</label></td>
+											  <td id="minusTd"></td>
+										  	</tr>
+									    </tbody>
+			                        </table>
+<!-- 			                        <table id="showMpTable" class="table table-bordered table-hover flyout hidden" style="display:none"> -->
+<!-- 			                        	<thead> -->
+<!-- 			                        	  <tr> -->
+<!-- 											  <th>预约号</th> -->
+<!-- 											  <th>预约人</th> -->
+<!-- 											  <th>预约数量</th> -->
+<!-- 											  <th>预约时间</th> -->
+<!-- 										  </tr> -->
+<!-- 										</thead> -->
+<!-- 										<tbody> -->
+<!-- 									    </tbody> -->
+<!-- 			                       	</table> -->
+			                    </div>
+		                        <div class="grid-btn">
+		                       	 	<label for="qty" class="control-label  col-2" style="padding-top: 5px;width: 5%">预约数:</label>
+	                        		<input class="form-control  col-2" id="qty" type="number" placeholder="请输入预约数"/>
+	                        		<label for="mpTime" class="control-label col-2" style="padding-top: 5px;width: 5%">预约日期:</label>
+									<input type="text" class="form-control datetimepicker-input col-3" name="mpTime" id="mpTime" data-toggle="datetimepicker" data-target="#mpTime">&nbsp;&nbsp;&nbsp;
+	                        		<button id="addRow" type="button" class="btn btn-sm btn-default" onclick="addRow()"><span class="fa fa-plus"></span></button>
+		                        	<button id="removeRow" type="button" class="btn btn-sm btn-default"  onclick="removeRow()"><span class="fa fa-minus"></span></button>
+		                        </div>
+		                        <div id="tableDiv">
+		                            <table id="table" class="table table-bordered table-hover" >
+			                        	<thead>
+			                        	  <tr>
+			                        	  	  <th style="width: 2%">
+											  <th style="width: 100px">部件号</th>
+											  <th style="width: 100px">部件描述</th>
+											  <th style="width: 100px">品牌</th>
+											  <th style="width: 100px">型号</th>
+											  <th style="width: 100px">预约数</th>
+											  <th style="width: 500px">备注</th>
+										  </tr>
+										</thead>
+										<tbody>
+									    </tbody>
+			                       	</table>
+			                     </div>
+				            </div>
+			            <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                       	</div>
+                     </div>
+                   </div>
+                </div>
+            </div>
+            <!-- /.modal -->
+        </div>
+    </div>
+    <!-- /.content-wrapper -->
+    <input  id="itemList" style="display: none;"  th:value="${itemList}">
+    <input  id="mpList" style="display: none;"  th:value="${mpList}">
+	
+    <!-- 引入页脚footer-fragment -->
+    <div th:replace="inventory/footer::footer-fragment"></div>
+
+<!-- jQuery -->
+<script th:src="@{/inventory/plugins/jquery/jquery.min.js}"></script>
+<!-- jQuery UI 1.11.4 -->
+<script th:src="@{/inventory/plugins/jQueryUI/jquery-ui.min.js}"></script>
+<script th:src="@{/inventory/plugins/inputpick/js/jquery.inputpicker.js}"></script>
+<!-- Bootstrap 4 -->
+<script th:src="@{/inventory/plugins/bootstrap/js/bootstrap.bundle.min.js}"></script>
+<!-- AdminLTE App -->
+<script th:src="@{/inventory/dist/js/adminlte.min.js}"></script>
+<script th:src="@{/inventory/plugins/jqgrid-5.3.0/jquery.jqGrid.min.js}"></script>
+<script th:src="@{/inventory/plugins/jqgrid-5.3.0/grid.locale-cn.js}"></script>
+<!-- sweetalert -->
+<script th:src="@{/inventory/plugins/sweetalert/sweetalert.min.js}"></script>
+<!-- Select2 -->
+<script th:src="@{/inventory/plugins/select2/select2.full.min.js}"></script>
+<!-- datetime -->
+<script th:src="@{/inventory/plugins/datetimepick/js/moment.js}"></script>
+<script th:src="@{/inventory/plugins/datetimepick/js/tempusdominus-bootstrap-4.js}"></script>
+<!-- validate -->
+<!-- <script th:src="@{/inventory/plugins/datetimepick/js/bootstrap-validate.js}"></script> -->
+<script th:src="@{/inventory/dist/js/public.js}"></script>
+<script th:src="@{/inventory/dist/js/mp.js}"></script>
+</body>
+</html>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.silgan.inventory.dao.UnitMapper" > 
+  <resultMap id="BaseResultMap" type="com.silgan.inventory.entity.Unit" >
+    <id column="unit_name" property="unitName" jdbcType="VARCHAR" />
+  </resultMap>  
+  <select id="selectUnits" resultMap="BaseResultMap" >
+    select distinct unit_name	
+    from tb_unit
+  </select>   
+</mapper>

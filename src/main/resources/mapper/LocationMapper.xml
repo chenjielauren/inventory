@@ -2,13 +2,12 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.silgan.inventory.dao.LocationMapper" > 
   <resultMap id="LocationMap" type="com.silgan.inventory.entity.Location" >
-    <id column="id" property="id" jdbcType="INTEGER" />
-    <result column="loc_code" property="locCode" jdbcType="INTEGER" />
+    <id column="loc_code" property="locCode" jdbcType="INTEGER" />
     <result column="loc_desc" property="locDesc" jdbcType="VARCHAR" />
     <result column="loc_rank"  property="locRank" jdbcType="INTEGER" />
   </resultMap>  
   <select id="selectLocation" resultMap="LocationMap" >
-    select distinct id,loc_code	
+    select distinct loc_code,loc_desc	
     from tb_location
     order by loc_rank
   </select>   

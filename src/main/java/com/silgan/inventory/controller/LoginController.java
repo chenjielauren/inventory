@@ -1,49 +1,41 @@
 package com.silgan.inventory.controller;
 
-import java.security.Principal;
+import java.util.Map;
 
 import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
+import com.silgan.inventory.entity.UserRole;
 import com.silgan.inventory.service.InvService;
-import com.silgan.inventory.service.ItemVendorService;
+import com.silgan.inventory.service.ItemService;
+import com.silgan.inventory.service.UserRoleService;
 
 @Controller
 public class LoginController {
 	@Resource
-    private ItemVendorService itemVendorService;
+    private ItemService itemService;
 	@Resource
     private InvService invService;
+	@Resource
+    private UserRoleService userRoleService;
 
-	@GetMapping({"", "/", "/index", "/index.html"})
-    public String login(Model model,Principal principal) {		
-		model.addAttribute("path", "index");
-	    model.addAttribute("itemCount", itemVendorService.getItemsCount());
-	    model.addAttribute("invCount", invService.getInvCount());
-//	    model.addAttribute("categoryCount", 9);
-//	    model.addAttribute("linkCount", 3);
-//	    model.addAttribute("tagCount", 7);	    
-		String username = getUserName(principal);
+	@GetMapping({"/","/login", "/index", "/index.html"})
+    public String login(Model model) {		  
+		UserRole u = userRoleService.getUser();
+    	String username = String.valueOf(u.getUserName());
         if(username!=null) {
-        	model.addAttribute("username", getUserName(principal));
+        	model.addAttribute("username", username);
+        	model.addAttribute("fullName", u.getFullName());
+        	//show menu according to userRole
+        	UserRole userRole = userRoleService.selectByUserName(username);
+        	String roleName= userRole.getRoleName();       	
+        	model.addAttribute("userRole", roleName);
+        	model.addAttribute("path", "index");
         	return "inventory/index";
         }        	
         return "inventory/login";
-    }
-
-    private String getUserName(Principal principal) {
-        if (principal == null) {
-            return "anonymous";
-        } else {       	
-            return principal.getName();
-        }
-    }
-    @GetMapping({"/loginout"})
-    public String loginout(Model model,Principal principal) {		
-		return "/login";
     }
 }

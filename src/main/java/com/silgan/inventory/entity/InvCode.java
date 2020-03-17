@@ -1,8 +1,6 @@
 package com.silgan.inventory.entity;
 
 public class InvCode {
-    private Integer id;
-
     private String invCode;
     
     private String invDesc;
@@ -10,14 +8,6 @@ public class InvCode {
     private Boolean vmi;
     
     private Integer invRank;
-
-	public Integer getId() {
-		return id;
-	}
-
-	public void setId(Integer id) {
-		this.id = id;
-	}
 
 	public String getInvCode() {
 		return invCode;

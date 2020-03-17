@@ -1,14 +1,16 @@
 package com.silgan.inventory.dao;
 
-import com.silgan.inventory.entity.ItemVendor;
 import java.util.List;
 
+import com.silgan.inventory.entity.Item;
+import com.silgan.inventory.entity.ItemVendor;
+
 public interface ItemVendorMapper {
-    int deleteByPrimaryKey(Integer vendorId);
+    int deleteByItemNumber(Integer itemNumber);
 
-    int insert(ItemVendor record);
+    int insert(Item item);
 
-    ItemVendor selectByPrimaryKey(Integer vendorId);
+    ItemVendor selectByPrimaryKey(Integer vendId);
 
     List<ItemVendor> selectAll();
 

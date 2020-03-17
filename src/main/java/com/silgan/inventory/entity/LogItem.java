@@ -16,15 +16,11 @@ public class LogItem {
 
     private String itemModel;
 
-    private String vendor;
-
-    private String vendorPn;
-
     private Boolean vmi;
 
     private Integer safeVmi;
 
-    private String expireDate;
+    private Integer expireDate;
     
     private String itemUnit;
 
@@ -37,6 +33,8 @@ public class LogItem {
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date modifyTime;
+    
+    private Boolean state;
 
 	public Integer getLogId() {
 		return logId;
@@ -78,22 +76,6 @@ public class LogItem {
 		this.itemModel = itemModel;
 	}
 
-	public String getVendor() {
-		return vendor;
-	}
-
-	public void setVendor(String vendor) {
-		this.vendor = vendor;
-	}
-
-	public String getVendorPn() {
-		return vendorPn;
-	}
-
-	public void setVendorPn(String vendorPn) {
-		this.vendorPn = vendorPn;
-	}
-
 	public Boolean getVmi() {
 		return vmi;
 	}
@@ -110,11 +92,11 @@ public class LogItem {
 		this.safeVmi = safeVmi;
 	}
 
-	public String getExpireDate() {
+	public Integer getExpireDate() {
 		return expireDate;
 	}
 
-	public void setExpireDate(String expireDate) {
+	public void setExpireDate(Integer expireDate) {
 		this.expireDate = expireDate;
 	}
 
@@ -157,5 +139,14 @@ public class LogItem {
 	public void setModifyTime(Date modifyTime) {
 		this.modifyTime = modifyTime;
 	}
+
+	public Boolean getState() {
+		return state;
+	}
+
+	public void setState(Boolean state) {
+		this.state = state;
+	}
+
 
 }

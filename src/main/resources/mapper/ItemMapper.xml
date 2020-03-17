@@ -1,93 +1,120 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.silgan.inventory.dao.ItemMapper">
-  <resultMap id="BaseResultMap" type="com.silgan.inventory.entity.Item">
+<resultMap id="BaseResultMap" type="com.silgan.inventory.entity.Item">
     <id column="item_number" jdbcType="INTEGER" property="itemNumber" />
     <result column="item_desc" jdbcType="VARCHAR" property="itemDesc" />
     <result column="item_brand" jdbcType="VARCHAR" property="itemBrand" />
     <result column="item_model" jdbcType="VARCHAR" property="itemModel" />
-    <result column="vendor" jdbcType="VARCHAR" property="vendor" />
-    <result column="vendor_PN" jdbcType="VARCHAR" property="vendorPn" />
     <result column="vmi" jdbcType="TINYINT" property="vmi" />
     <result column="safe_vmi" jdbcType="INTEGER" property="safeVmi" />
-    <result column="expire_date" jdbcType="VARCHAR" property="expireDate" />
+    <result column="expire_date" jdbcType="INTEGER" property="expireDate" />
     <result column="item_unit" jdbcType="VARCHAR" property="itemUnit" />
     <result column="create_user" jdbcType="VARCHAR" property="createUser" />
     <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
     <result column="modify_user" jdbcType="VARCHAR" property="modifyUser" />
     <result column="modify_time" jdbcType="TIMESTAMP" property="modifyTime" />
+    <result column="state" jdbcType="TINYINT" property="state" />
+  </resultMap>
+<resultMap id="ItemVendorMap" type="com.silgan.inventory.entity.Item">
+    <id column="item_number" jdbcType="INTEGER" property="itemNumber" />
+    <result column="item_desc" jdbcType="VARCHAR" property="itemDesc" />
+    <result column="item_brand" jdbcType="VARCHAR" property="itemBrand" />
+    <result column="item_model" jdbcType="VARCHAR" property="itemModel" />
+    <result column="vmi" jdbcType="TINYINT" property="vmi" />
+    <result column="safe_vmi" jdbcType="INTEGER" property="safeVmi" />
+    <result column="expire_date" jdbcType="INTEGER" property="expireDate" />
+    <result column="item_unit" jdbcType="VARCHAR" property="itemUnit" />
+    <result column="create_user" jdbcType="VARCHAR" property="createUser" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="modify_user" jdbcType="VARCHAR" property="modifyUser" />
+    <result column="modify_time" jdbcType="TIMESTAMP" property="modifyTime" />
+    <result column="state" jdbcType="TINYINT" property="state" />
+    <collection property="vendIds" javaType="List" ofType="java.lang.String">
+        <result property="vendId" column="vend_id"/>
+    </collection>
   </resultMap>
    <sql id="Base_Column_List">
-    item_number, item_desc, item_brand, item_model, vendor, vendor_PN, vmi, safe_vmi, 
-    expire_date, item_unit,create_user, create_time, modify_user, modify_time
+    item_number, item_desc, item_brand, item_model, vmi, safe_vmi, 
+    expire_date, item_unit,create_user, create_time, modify_user, modify_time,state
   </sql>
-  <delete id="deleteBatch">
-    delete from tb_item
+  <update id="deleteBatch">
+    update tb_item set state = 0
     where item_number in
     <foreach item="itemNumber" collection="array" open="(" separator="," close=")">
          #{itemNumber}
      </foreach>
-  </delete>  
+  </update>  
   <insert id="insert" parameterType="com.silgan.inventory.entity.Item">
-    <selectKey keyProperty="itemNumber" order="AFTER" resultType="java.lang.Integer">
+    <selectKey keyProperty="itemNumber" order="AFTER" resultType="java.lang.Integer" >
       SELECT LAST_INSERT_ID()
     </selectKey>
     insert into tb_item (item_desc, item_brand, item_model, 
-      vendor, vendor_PN, vmi, 
+       vmi, 
       safe_vmi, expire_date,item_unit, create_user, 
-      create_time
+      create_time,state
       )
     values (#{itemDesc,jdbcType=VARCHAR}, #{itemBrand,jdbcType=VARCHAR}, #{itemModel,jdbcType=VARCHAR}, 
-      #{vendor,jdbcType=VARCHAR}, #{vendorPn,jdbcType=VARCHAR}, #{vmi,jdbcType=TINYINT}, 
-      #{safeVmi,jdbcType=INTEGER}, #{expireDate,jdbcType=VARCHAR}, #{itemUnit,jdbcType=VARCHAR},#{createUser,jdbcType=VARCHAR}, 
-      #{createTime,jdbcType=TIMESTAMP}
+      #{vmi,jdbcType=TINYINT}, 
+      #{safeVmi,jdbcType=INTEGER}, #{expireDate,jdbcType=INTEGER}, #{itemUnit,jdbcType=VARCHAR},#{createUser,jdbcType=VARCHAR}, 
+      #{createTime,jdbcType=TIMESTAMP}, #{state,jdbcType=TINYINT}
       )
+     
+      
   </insert>
   <update id="updateByPrimaryKey" parameterType="com.silgan.inventory.entity.Item">
     update tb_item
     set item_desc = #{itemDesc,jdbcType=VARCHAR},
       item_brand = #{itemBrand,jdbcType=VARCHAR},
       item_model = #{itemModel,jdbcType=VARCHAR},
-      vendor = #{vendor,jdbcType=VARCHAR},
-      vendor_PN = #{vendorPn,jdbcType=VARCHAR},
       vmi = #{vmi,jdbcType=TINYINT},
       safe_vmi = #{safeVmi,jdbcType=INTEGER},
-      expire_date = #{expireDate,jdbcType=VARCHAR},
+      expire_date = #{expireDate,jdbcType=INTEGER},
       item_unit = #{itemUnit,jdbcType=VARCHAR},
       modify_user = #{modifyUser,jdbcType=VARCHAR},
       modify_time = #{modifyTime,jdbcType=TIMESTAMP}
     where item_number = #{itemNumber,jdbcType=INTEGER}
   </update>
-  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
-    select 
-     <include refid="Base_Column_List"/>
-    from tb_item
-    where item_number = #{itemNumber,jdbcType=INTEGER}
-  </select>
-  <select id="selectAll" resultMap="BaseResultMap">
-    select 
- 	<include refid="Base_Column_List"/>
-    from tb_item
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="ItemVendorMap">
+  	SELECT  i.item_number, item_desc, item_brand, item_model, vmi, safe_vmi, 
+	    	expire_date, item_unit,create_user, create_time, modify_user, modify_time,state,v.vend_id
+	FROM tb_item i left join  tb_item_vendor v on i.item_number = v.item_number
+	where i.item_number = #{itemNumber,jdbcType=INTEGER}
+
   </select>
   <select id="findItemList" parameterType="Map" resultMap="BaseResultMap">
     select 
     <include refid="Base_Column_List"/>
     from tb_item where 1=1     
     <if test="keyword!=null">
-         AND (item_desc like CONCAT('%',#{keyword},'%' ) or item_number like CONCAT('%',#{keyword},'%' ))
+         AND (item_number like CONCAT('%',#{keyword},'%' ) or item_desc like CONCAT('%',#{keyword},'%' ) 
+         or item_brand like CONCAT('%',#{keyword},'%' ) or item_model like CONCAT('%',#{keyword},'%' ) 
+         	)
     </if>
+    <if test="vmi!=null and vmi!=-1">
+         AND vmi = #{vmi}
+    </if>
+    <if test="state!=null and state!=-1">
+         AND state = #{state}
+    </if>   
     order by create_time desc
     <if test="start!=null and limit!=null">
         limit #{start},#{limit}
-    </if>
-    
+    </if>   
   </select>
   <select id="getTotalItems" parameterType="Map" resultType="int">
      select count(*) from tb_item
      where  1=1 
      <if test="keyword!=null">
-        AND (item_desc like CONCAT('%',#{keyword},'%' ) or item_number like CONCAT('%',#{keyword},'%' ))
+         AND (item_number like CONCAT('%',#{keyword},'%' ) or item_desc like CONCAT('%',#{keyword},'%' ) 
+         or item_brand like CONCAT('%',#{keyword},'%' ) or item_model like CONCAT('%',#{keyword},'%' ))
    	</if>
+   	<if test="vmi!=null and vmi!=-1">
+         AND vmi = #{vmi}
+    </if>
+    <if test="state!=null and state!=-1">
+         AND state = #{state}
+    </if> 
   </select>
   <!-- 新增log_item -->
   <insert id="insertLog" parameterType="com.silgan.inventory.entity.LogItem">
@@ -95,14 +122,58 @@
       SELECT LAST_INSERT_ID()
     </selectKey>
     insert into log_tb_item (item_number,item_desc, item_brand, item_model, 
-      vendor, vendor_PN, vmi, 
-      safe_vmi, expire_date,item_unit,create_user,create_time,modify_user,modify_time
+      vmi,safe_vmi, expire_date,item_unit,create_user,create_time,modify_user,modify_time,state
       )
     values (#{itemNumber,jdbcType=INTEGER},#{itemDesc,jdbcType=VARCHAR}, #{itemBrand,jdbcType=VARCHAR}, #{itemModel,jdbcType=VARCHAR}, 
-      #{vendor,jdbcType=VARCHAR}, #{vendorPn,jdbcType=VARCHAR}, #{vmi,jdbcType=TINYINT}, 
-      #{safeVmi,jdbcType=INTEGER}, #{expireDate,jdbcType=VARCHAR}, #{itemUnit,jdbcType=VARCHAR},#{createUser,jdbcType=VARCHAR}, 
+      #{vmi,jdbcType=TINYINT}, 
+      #{safeVmi,jdbcType=INTEGER}, #{expireDate,jdbcType=INTEGER}, #{itemUnit,jdbcType=VARCHAR},#{createUser,jdbcType=VARCHAR}, 
       #{createTime,jdbcType=TIMESTAMP},#{modifyUser,jdbcType=VARCHAR}, 
-      #{modifyTime,jdbcType=TIMESTAMP}
+      #{modifyTime,jdbcType=TIMESTAMP}, #{state,jdbcType=TINYINT}
       )
   </insert>
+  <select id="findItemByKeyword" parameterType="com.silgan.inventory.entity.Item" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List"/>
+    from tb_item where (item_desc like CONCAT('%',#{itemDesc},'%' ) and 
+    					item_brand like CONCAT('%',#{itemBrand},'%' ) and 
+    					item_model like CONCAT('%',#{itemModel},'%' ))
+    <!-- 修改Item时调用 -->
+    <if test="itemNumber!=null ">
+         AND item_number != #{itemNumber}
+    </if>    
+  </select>
+  
+ <update id="enableItem">
+    update tb_item set state = 1
+    where item_number in
+    <foreach item="itemNumber" collection="array" open="(" separator="," close=")">
+         #{itemNumber}
+     </foreach>
+  </update> 
+  
+  <select id="selectItems" parameterType="Map" resultMap="BaseResultMap">
+    select  
+    <include refid="Base_Column_List"/>
+    from tb_item where 1=1
+    <if test="state!=null">
+    	and  state = 1 
+    </if>
+    <if test="itemNumbers!=null">
+        AND item_number in
+        <foreach collection="itemNumbers" item="itemNumber" separator=","
+            open="(" close=")">
+            #{itemNumber}
+        </foreach>
+     </if>
+    order by create_time desc
+  </select>
+  
+  <select id="getItemByVendId" parameterType="java.lang.String" resultMap="BaseResultMap">
+    select  
+    <include refid="Base_Column_List"/>
+    from tb_item where item_number in (select item_number from tb_item_vendor where vend_id = #{vendId})
+  </select>
+  
+  
+  
 </mapper>

@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<title>Error</title>
+<link rel="stylesheet" th:href="@{/css/bootstrap.min.css}"
+	href="../../css/bootstrap.min.css" />
+</head>
+<body>
+	<div class="container">
+		<h1>Sorry, you do not have permission to view this page</h1>
+		<div id="created" th:text="${#dates.format(timestamp)}"></div>
+		<div>
+			Click <a th:href="@{/login}">here</a>to go back to the Loginpage.
+		</div>
+		<div th:text="${message}">Fake content</div>
+		<div>
+			Please contact the operator with the above information.
+		</div>
+		
+	</div>
+</body>
+</html>

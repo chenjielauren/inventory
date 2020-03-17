@@ -228,6 +228,7 @@ caption {
 
 th {
   text-align: inherit;
+  font-weight: bold;
 }
 
 label {
@@ -5459,6 +5460,19 @@ button.close {
   }
 }
 
+@media (min-width: 992px) {
+  .modal-full {
+    min-width: 70%;
+    margin-left: 80;
+	}
+	.modal-mp {
+    min-width: 50%;
+    margin-left: 80;
+	}
+	
+}
+
+
 .tooltip {
   position: absolute;
   z-index: 1070;
@@ -9752,5 +9766,13 @@ a.text-dark:hover, a.text-dark:focus {
 }
 .glyphicon-menu-up:before {
   content: "\e260";
+}
+input[type=number] {
+   -moz-appearance: textfield;
+}
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
 }
 /*# sourceMappingURL=bootstrap.css.map */

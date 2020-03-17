@@ -71,8 +71,23 @@ function validUserName(userName) {
  * @param str
  * @returns {boolean}
  */
-function validCN_ENString2_18(str) {
-    var pattern = /^[a-zA-Z0-9-\u4E00-\u9FA5_,， ]{2,18}$/;
+function validCN_ENString(str) {
+    var pattern = /^[a-zA-Z0-9-\u4E00-\u9FA5_,， ]$/;
+    if (pattern.test(str.trim())) {
+        return (true);
+    } else {
+        return (false);
+    }
+}
+
+/**
+ * 正则匹配2-18位的中英文字符串
+ *
+ * @param str
+ * @returns {boolean}
+ */
+function validCN_ENString2_20(str) {
+    var pattern = /^[a-zA-Z0-9-\u4E00-\u9FA5_,， ]{2,20}$/;
     if (pattern.test(str.trim())) {
         return (true);
     } else {
@@ -109,8 +124,6 @@ function validPassword(password) {
         return (false);
     }
 }
-
-<!-- 正则验证 end-->
 
 /**
  * 获取jqGrid选中的一条记录
@@ -167,3 +180,51 @@ function getSelectedRows() {
     }
     return grid.getGridParam("selarrrow");
 }
+
+function AutoResizeImage(maxWidth,maxHeight,objImg){
+	var img = new Image();
+	img.src = objImg.src;
+	var hRatio;
+	var wRatio;
+	var Ratio = 1;
+	var w = img.width;
+	var h = img.height;
+	wRatio = maxWidth / w;
+	hRatio = maxHeight / h;
+	if (maxWidth ==0 && maxHeight==0){
+	Ratio = 1;
+	}else if (maxWidth==0){//
+	if (hRatio<1) Ratio = hRatio;
+	}else if (maxHeight==0){
+	if (wRatio<1) Ratio = wRatio;
+	}else if (wRatio<1 || hRatio<1){
+	Ratio = (wRatio<=hRatio?wRatio:hRatio);
+	}
+	if (Ratio<1){
+	w = w * Ratio;
+	h = h * Ratio;
+	}
+	objImg.height = h;
+	objImg.width = w;
+}
+
+//显示部件描述/品牌/型号
+function generateItemUnionArr(){
+	itemUnionArr = [];
+	$.each(JSON.parse($("#itemList").val()), function(key, value) {
+		var itemNumber = value.itemNumber;
+		var unionStr = value.itemDesc+"/"+value.itemBrand+"/"+value.itemModel;
+		itemUnionArr[itemNumber] = unionStr;			
+	});
+	return itemUnionArr;
+}  
+
+//Item对象
+function generateItem(){
+	itemArr = [];
+	$.each(JSON.parse($("#itemList").val()), function(key, value) {
+		var itemNumber = value.itemNumber;
+		itemArr[itemNumber] = value;			
+	});
+	return itemArr;
+} 

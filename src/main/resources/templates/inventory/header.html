@@ -3,11 +3,11 @@
 <head th:fragment="header-fragment">
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>库存管理 | 后台管理系统</title>
+    <title th:text="${title}">库存管理</title>
     <!-- Tell the browser to be responsive to screen width -->
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- Font Awesome -->
-    <link rel="shortcut icon" th:href="@{/inventory/dist/img/favicon.png}"/>
+	<link rel="shortcut icon"  th:href="@{/inventory/dist/img/silgan.png}"/>
     <link rel="stylesheet" th:href="@{/inventory/dist/css/font-awesome.min.css}">
     <!-- Ionicons -->
     <link rel="stylesheet" th:href="@{/inventory/dist/css/ionicons.min.css}">
@@ -17,32 +17,29 @@
     <link rel="stylesheet" th:href="@{/inventory/plugins/jqgrid-5.3.0/ui.jqgrid-bootstrap4.css}"/>
     <!-- Theme style -->
     <link rel="stylesheet" th:href="@{/inventory/dist/css/adminlte.min.css}">
+    <!-- Theme style -->
+    <link rel="stylesheet" th:href="@{/inventory/dist/css/base.css}">
 </head>
 <!-- Navbar -->
 <nav class="main-header navbar navbar-expand bg-white navbar-light border-bottom" th:fragment="header-nav">
     <!-- Left navbar links -->
     <ul class="navbar-nav">
+    	
         <li class="nav-item">
             <a class="nav-link" data-widget="pushmenu" href="#"><i class="fa fa-bars"></i></a>
-        </li>
-        <li class="nav-item d-none d-sm-inline-block">
-            <a th:href="@{/index}" class="nav-link">首页</a>
         </li>
     </ul>
     <!-- Right navbar links -->
     <ul class="navbar-nav ml-auto">
-        <li class="nav-item dropdown">
-            <a class="nav-link" data-toggle="dropdown" href="#">
-                <i class="fa fa-user">&nbsp;&nbsp;欢迎</i>
+    	<li class="nav-item">
+    		<a class="nav-link">
+                <i class="fa fa-user-o mr-2"  th:text="${fullName}">Lauren</i>
+         	</a>			
+    	</li>
+         <li class="nav-item">            
+            <a class="nav-link" th:href="@{/logout}">
+                <i class="fa fa-sign-out nav-icon"></i>
             </a>
-            <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
-                <div class="dropdown-divider"></div>
-                <a href="#" class="dropdown-item">
-                    <i class="fa fa-user-o mr-2"></i> 姓名
-                    <span class="float-right text-muted text-sm" th:text="${username}">Lauren</span>
-                </a>
-                
-            </div>
         </li>
     </ul>
 </nav>

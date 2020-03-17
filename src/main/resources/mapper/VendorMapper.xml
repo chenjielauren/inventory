@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.silgan.inventory.dao.VendorMapper" > 
+  <resultMap id="BaseResultMap" type="com.silgan.inventory.entity.Vendor" >
+    <id column="vend_id" property="vendId" jdbcType="VARCHAR" />
+    <result column="vend_name" property="vendName" jdbcType="VARCHAR"  />
+    <result column="vmi" property="vmi"  jdbcType="TINYINT" />
+    <result column="status"  property="status" jdbcType="TINYINT" />
+    <result column="vmi_inv" property="vmiInv"  jdbcType="VARCHAR"/>
+  </resultMap>
+  <sql id="Base_Column_List">
+    vend_id,vend_name,vmi,status,vmi_inv
+  </sql>  
+  <select id="selectVendors" resultMap="BaseResultMap" parameterType="Map">
+    select  <include refid="Base_Column_List"/>
+    from tb_vendor where vmi=1 
+<!--     <if test="itemNumber!=null"> -->
+<!--       and  vend_id in (select vend_id from tb_item_vendor where item_number = #{itemNumber}) -->
+<!--     </if> -->
+   <if test="vendIds!=null">
+        AND vend_id in
+        <foreach collection="vendIds" item="vendId" separator=","
+            open="(" close=")">
+            #{vendId}
+        </foreach>
+     </if>
+	
+  </select>   
+</mapper>

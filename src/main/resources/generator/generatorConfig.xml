@@ -22,9 +22,13 @@
 <!--          mysql 配置 -->
 <!--          <generatedKey column="vendor_id" sqlStatement="Mysql" identity="true"/>         -->
 <!--     </table> -->
-    <table tableName="tb_inv" domainObjectName="Inv" >
+<!--     <table tableName="tb_dc" domainObjectName="Dc" > -->
          
-         <generatedKey column="id" sqlStatement="Mysql" identity="true"/>        
+<!--          <generatedKey column="dc_seq" sqlStatement="Mysql" identity="true"/>         -->
+<!--     </table> -->
+ 	<table tableName="tb_material_plan" domainObjectName="MaterialPlan" >
+         
+         <generatedKey column="tb_material_plan" sqlStatement="Mysql" identity="true"/>        
     </table>
   </context>
 </generatorConfiguration>

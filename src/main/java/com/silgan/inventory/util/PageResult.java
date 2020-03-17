@@ -14,9 +14,15 @@ public class PageResult implements Serializable {
     //当前页数
     private int currPage;
     //列表数据
-    private List<?> list;
+    private List<?> list;    
+    //JSON 列表数据
+    private List<?> data;
 
-    /**
+    public PageResult() {
+		super();
+	}
+
+	/**
      * 分页
      *
      * @param list       列表数据
@@ -26,11 +32,28 @@ public class PageResult implements Serializable {
      */
     public PageResult(List<?> list, int totalCount, int pageSize, int currPage) {
         this.list = list;
+        this.data = list;
         this.totalCount = totalCount;
         this.pageSize = pageSize;
         this.currPage = currPage;
         this.totalPage = (int) Math.ceil((double) totalCount / pageSize);
     }
+    
+//	/**
+//     * 分页
+//     *
+//     * @param list       列表数据
+//     * @param totalCount 总记录数
+//     * @param pageSize   每页记录数
+//     * @param currPage   当前页数
+//     */
+//    public PageResult(List<?> data, int totalCount, int pageSize) {
+//        this.data = data;
+//        this.totalCount = totalCount;
+//        this.pageSize = pageSize;
+//        this.currPage = currPage;
+//        this.totalPage = (int) Math.ceil((double) totalCount / pageSize);
+//    }
 
     public int getTotalCount() {
         return totalCount;
@@ -71,5 +94,13 @@ public class PageResult implements Serializable {
     public void setList(List<?> list) {
         this.list = list;
     }
+
+	public List<?> getData() {
+		return data;
+	}
+
+	public void setData(List<?> data) {
+		this.data = data;
+	}
 
 }

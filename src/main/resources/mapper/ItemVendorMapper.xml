@@ -2,39 +2,28 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.silgan.inventory.dao.ItemVendorMapper">
   <resultMap id="BaseResultMap" type="com.silgan.inventory.entity.ItemVendor">
-    <id column="vendor_id" jdbcType="INTEGER" property="vendorId" />
-    <result column="vendor_name" jdbcType="VARCHAR" property="vendorName" />
-    <result column="vendor_pn" jdbcType="VARCHAR" property="vendorPn" />
-    <result column="vendor_rank" jdbcType="INTEGER" property="vendorRank" />
-    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="item_number" jdbcType="INTEGER" property="itemNumber" />
+    <result column="vend_id" jdbcType="VARCHAR" property="vendId" />
   </resultMap>
-  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+  <delete id="deleteByItemNumber" parameterType="java.lang.Integer">
     delete from tb_item_vendor
-    where vendor_id = #{vendorId,jdbcType=INTEGER}
+    where item_number = #{itemNumber,jdbcType=INTEGER}
   </delete>
-  <insert id="insert" parameterType="com.silgan.inventory.entity.ItemVendor">
-    <selectKey keyProperty="vendorId" order="AFTER" resultType="java.lang.Integer">
-      SELECT LAST_INSERT_ID()
-    </selectKey>
-    insert into tb_item_vendor (vendor_name, vendor_pn, vendor_rank, 
-      create_time)
-    values (#{vendorName,jdbcType=VARCHAR}, #{vendorPn,jdbcType=VARCHAR}, #{vendorRank,jdbcType=INTEGER}, 
-      SYSDATE())
+  
+  <insert id="insert" parameterType="com.silgan.inventory.entity.Item">
+   	insert into tb_item_vendor (item_number, vend_id) values
+	  <foreach item="vendId" collection="vendIds" separator=",">
+	    (#{itemNumber}, #{vendId})
+	  </foreach>
   </insert>
-  <update id="updateByPrimaryKey" parameterType="com.silgan.inventory.entity.ItemVendor">
-    update tb_item_vendor
-    set vendor_name = #{vendorName,jdbcType=VARCHAR},
-      vendor_pn = #{vendorPn,jdbcType=VARCHAR},
-      vendor_rank = #{vendorRank,jdbcType=INTEGER}
-    where vendor_id = #{vendorId,jdbcType=INTEGER}
-  </update>
+ 
   <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
-    select vendor_id, vendor_name, vendor_pn, vendor_rank, create_time
+    select vend_id, vendor_name, vendor_pn, vendor_rank, create_time
     from tb_item_vendor
-    where vendor_id = #{vendorId,jdbcType=INTEGER}
+    where vend_id = #{vendId,jdbcType=INTEGER}
   </select>
   <select id="selectAll" resultMap="BaseResultMap">
-    select vendor_id, vendor_name, vendor_pn, vendor_rank, create_time
+    select vend_id, vendor_name, vendor_pn, vendor_rank, create_time
     from tb_item_vendor
   </select>
 </mapper>

@@ -1,6 +1,7 @@
 package com.silgan.inventory.dao;
 
 import java.util.List;
+import java.util.Map;
 
 import com.silgan.inventory.entity.Item;
 import com.silgan.inventory.entity.LogItem;
@@ -13,8 +14,6 @@ public interface ItemMapper {
 
     Item selectByPrimaryKey(Integer itemNumber);
 
-    List<Item> selectAll();
-
     int updateByPrimaryKey(Item record);
 
 	List<Item> findItemList(PageQueryUtil pageUtil);
@@ -24,4 +23,13 @@ public interface ItemMapper {
 	int deleteBatch(Integer[] itemNumbers);
 	
 	int insertLog(LogItem record);
+
+	List<Item> findItemByKeyword(Item item);
+
+	int enableItem(Integer[] itemNumbers);
+	
+	List<Item> selectItems(Map<String, Object> map);
+
+	List<Item> getItemByVendId(String vendId);
+	
 }

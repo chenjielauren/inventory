@@ -3,9 +3,7 @@
 <header th:replace="inventory/header::header-fragment"></header>
 <body class="hold-transition sidebar-mini">
 <link th:href="@{/inventory/plugins/select2/select2.css}" rel="stylesheet"/>
-<link th:href="@{/inventory/plugins/jqgrid-5.3.0/ui.jqgrid.css}" rel="stylesheet"/>
-<link th:href="@{/inventory/plugins/jqgrid-5.3.0/ui.jqgrid-bootstrap.css}" rel="stylesheet"/>
-<link th:href="@{/inventory/plugins/jqgrid-5.3.0/ui.jqgrid-bootstrap-ui.css}" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-validator/0.5.3/css/bootstrapValidator.css"/>
 <style>
     .ui-jqgrid tr.jqgrow td {
         white-space: normal !important;
@@ -13,6 +11,10 @@
         vertical-align: text-top;
         padding-top: 2px;
     }
+    .form-group .form-control-label:after {
+	  content:"*";
+	  color:red;
+	}
 </style>
 <div class="wrapper">
     <!-- 引入页面头header-fragment -->
@@ -41,8 +43,27 @@
                             <button class="btn btn-info" onclick="itemEdit()"><i
                                     class="fa fa-pencil-square-o"></i>&nbsp;修改
                             </button>
-                            <button class="btn btn-danger" onclick="deleteItem()"><i
-                                    class="fa fa-trash-o"></i>&nbsp;删除
+                            <button class="btn btn-success" id="enableBtn" onclick="enableItem()" style="display: none;"><i
+                                    class="fa fa-check"></i>&nbsp;启用
+                            </button>
+                            <button class="btn btn-danger" id="disableBtn" onclick="disableItem()"><i
+                                    class="fa fa-times"></i>&nbsp;停用
+                            </button>
+                            <input type="text" placeholder="关键字(部件号/描述/型号/品牌)" id="keyword" class="form-control col-3">&nbsp;&nbsp;
+							<div class="form-check">
+						      <input type="checkbox" class="control-label" id="state">
+						      <label class="control-label" for="state" style="padding-top: 5px">
+						             停用
+						      </label>
+						    </div>&nbsp;&nbsp;
+                            <div class="form-check">
+						      <input type="checkbox" class="control-label" id="vmiCheck" onclick="search()">
+						      <label class="control-label" for="vmiCheck" style="padding-top: 5px">
+						        vmi
+						      </label>
+						    </div>&nbsp;&nbsp;
+                            <button class="btn btn-info" onclick="search()"><i
+                                    class="fa fa-search"></i>&nbsp;搜索
                             </button>
                         </div>
                         <table id="jqGrid" class="table table-bordered">
@@ -59,103 +80,171 @@
                 <div class="modal-dialog" role="document">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
-                                    aria-hidden="true">&times;</span></button>
-                            <h6 class="modal-title" id="itemModalLabel">Modal</h6>
-                        </div>
+				          <h4 class="modal-title">Modal Heading</h4>
+				          <button type="button" class="close" data-dismiss="modal">&times;</button>
+				        </div>
                         <div class="modal-body">
-                            <form id="itemForm" method="POST" th:action="@{/inventory/items/save}" th:object="${item}" onsubmit="return false;">
+								<form id="itemForm" method="POST" th:action="@{/inventory/items/save}" th:object="${item}" novalidate  > 							
                                 <div class="form-group">
                                     <div class="alert alert-danger" id="edit-error-msg" style="display: none;">
                                         	错误信息展示栏。
                                     </div>
                                 </div>
-                                <input type="hidden" class="form-control" id="itemNumber" th:field="*{itemNumber}">
+                                <input type="hidden" class="form-control" id="itemNumber" th:field="*{itemNumber}" >
                                 <div class="form-group">
-                                    <label for="itemDesc" class="control-label">描述:</label>
-                                    <input type="text" class="form-control" id="itemDesc"   th:field="*{itemDesc}" maxlength="100"
-                                           placeholder="请输入物品描述" required="true">
+                                    <label for="itemDesc" class="form-control-label">描述:</label>
+                                    <input type="text" class="form-control" id="itemDesc"  th:field="*{itemDesc}" maxlength="100" 
+                                           placeholder="请输入物品描述" required>
+                                    <div class="invalid-feedback">请输入物品描述</div>
+
                                 </div>
                                 <div class="form-group">
-                                    <label for="itemBrand" class="control-label">品牌:</label>
-                                    <input type="text" class="form-control" id="itemBrand"  th:field="*{itemBrand}"  maxlength="20"
-                                           placeholder="请输入物品品牌" required="true" >
+                                    <label for="itemBrand" class="form-control-label">品牌:</label>
+                                    <input type="text" class="form-control" id="itemBrand" th:field="*{itemBrand}"  maxlength="20"   
+                                           placeholder="请输入物品品牌" required >
+                                    <div class="invalid-feedback">请输入物品品牌</div>
                                 </div>
                                 <div class="form-group">
-                                    <label for="itemModel" class="control-label">型号:</label>
-                                    <input type="text" class="form-control" id="itemModel" th:field="*{itemModel}"  maxlength="20"
-                                           placeholder="请输入物品型号" required="true">
-                                </div>
+                                    <label for="itemModel" class="form-control-label">型号:</label>
+                                    <input type="text" class="form-control" id="itemModel" th:field="*{itemModel}"  maxlength="20" 
+                                           placeholder="请输入物品型号" required>
+                                    <div class="invalid-feedback">请输入物品型号</div>
+                                </div>                                
                                 <div class="form-group">
-                                    <label for="vendor" class="control-label">供应商:</label>
-                                    <select class="form-control select2" style="width: 100%;" id="vendor"  th:field="*{vendor}"
-                                        data-placeholder="请选择供应商...">
-	                                    <th:block th:if="${null == vendorList}">
-	                                        <option value="0" selected="selected">默认分类</option>
-	                                    </th:block>
-	                                    <th:block th:unless="${null == vendorList}">
-	                                        <th:block th:each="c : ${vendorList}">
-	                                            <option th:value="${c.vendorName}" th:text="${c.vendorName}">
-	                                            </option>
-	                                        </th:block>
-	                                    </th:block>		
-                                	</select>
+                                	<input id="vmi"  type="checkbox"  th:field="*{vmi}" th:value="${vmi}" name="vmi" 
+								      th:checked="${null !=item and null !=item.vmi} ?true:false"><label th:text="VMI" ></label>
                                 </div>
-                                <div class="form-group">
-                                    <label for="vendorPn" class="control-label">供应商(Part Number):</label>
-                                    <select class="form-control select2" style="width: 100%;" id="vendorPn" th:field="*{vendorPn}"
-                                        data-placeholder="请选择供应商(Part Number)...">
-	                                    <th:block th:if="${null == vendorList}">
-	                                        <option value="0" selected="selected">默认分类</option>
-	                                    </th:block>
-	                                    <th:block th:unless="${null == vendorList}">
-	                                        <th:block th:each="c : ${vendorList}">
-	                                            <option th:value="${c.vendorPn}" th:text="${c.vendorPn}">
-	                                            </option>
-	                                        </th:block>
-	                                    </th:block>		
-                                	</select>
-                                </div>
-                                <div class="form-group">
-                                	<input id="vmi"  type="checkbox"  th:field="*{vmi}" th:value="${vmi}" 
-								      th:checked="${null !=item and null !=item.vmi} ?true:false">VMI</checkbox>
+                                <div id="vendDiv" class="form-group"  style="display: none;">
+                                	<th:block th:if="${null != vendorList}">
+                                        <th:block th:each="vend : ${vendorList}">
+                                        	<input type="checkbox" th:field="*{vendIds}" th:value="${vend.vendId}" name="vendIds"/>
+                                        	<p class="font-weight-normal" th:text="${vend.vendName}" style="display: inline;"></p><br>                                          
+                                        </th:block>
+                                    </th:block>
                                 </div>
                                 <div class="form-group">
                                     <label for="safeVmi" class="control-label">安全库存数:</label>
-                                    <input type="number" class="form-control" id="safeVmi" th:field="*{safeVmi}" maxlength="6"
-                                           placeholder="请输入安全库存数" required="true">
+                                    <input type="number" class="form-control" id="safeVmi" th:field="*{safeVmi}" maxlength="6" min="0"
+                                           placeholder="请输入安全库存数">
+                                    <div class="invalid-feedback">数量不能小于0</div>
                                 </div>
                                 <div class="form-group">
-                                    <label for="itemUnit" class="control-label">单位:</label>
-                                    <input  class="form-control" id="itemUnit" th:field="*{itemUnit}" maxlength="10"
-                                           placeholder="请输入单位" required="true">
+                                    <label for="itemUnit" class="control-label">单位:</label>									
+									 <select class="form-control select2" style="width: 100%;" id="itemUnit" th:field="*{itemUnit}" 
+                                        data-placeholder="请输入单位(Unit)">	                                    
+	                                    <th:block th:if="${null != unitList}">
+	                                        <th:block th:each="c : ${unitList}">
+	                                            <option th:value="${c.unitName}" th:text="${c.unitName}" >
+	                                            </option>
+	                                        </th:block>
+	                                    </th:block>		
+                                	</select>									
                                 </div>
                                 <div class="form-group">
                                     <label for="expireDate" class="control-label">有效期:</label>
                                     <div class="radio-inline">
-								    	<input type="radio" th:field="*{expireDate}" value="360天" />
-	    								<label th:for="${#ids.prev('expireDate')}"  >360天</label>
-	    								<input type="radio" th:field="*{expireDate}" value="720天"/>
-	    								<label th:for="${#ids.prev('expireDate')}"  >720天</label>
-	    								<input type="radio" th:field="*{expireDate}" value="1080天"/>
-	    								<label th:for="${#ids.prev('expireDate')}"  >1080天</label>
-	    								<input type="radio" th:field="*{expireDate}"  value="others"/>
-	    								<label th:for="${#ids.prev('expireDate')}"  >其他(天)</label>
+								    	<input type="radio" th:field="*{expireDate}" value="360" />
+	    								<span th:for="${#ids.prev('expireDate')}"   style="display: inline;">360天</span>
+	    								<input type="radio" th:field="*{expireDate}" value="720"/>
+	    								<span th:for="${#ids.prev('expireDate')}"   style="display: inline;">720天</span>
+	    								<input type="radio" th:field="*{expireDate}" value="1080"/>
+	    								<span th:for="${#ids.prev('expireDate')}"   style="display: inline;">1080天</span>
+	    								<input type="radio" th:field="*{expireDate}"  value=""/>
+	    								<span th:for="${#ids.prev('expireDate')}"   style="display: inline;">其他(天)</span>
 	    								<input type="number" class="form-control" id="other" th:field="*{expireDate}" style="display: none;"
-                                           placeholder="请输入有效期"  maxlength="20">  
-							    	</div>
-                                </div>                                                             
+                                           placeholder="请输入有效期"  maxlength="20" min="0">
+                                        <div class="invalid-feedback">天数不能小于0</div>  
+							    	</div>							    	
+                                </div>
+                               <input id="state"  type="checkbox"  th:field="*{state}"  style="display: none;"
+								      th:checked="${null !=state and null !=item.state} ?true:false">                                                            
                             </form>
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
-                            <button type="button" class="btn btn-primary" id="saveButton">确认</button>
+                            <button type="submit" class="btn btn-primary" id="saveButton" >确认</button>
                         </div>
                     </div>
                 </div>
             </div>
             <!-- /.modal -->
         </div>
+        
+        <div class="content">
+            <!-- 模态框（Modal） -->
+            <div class="modal fade" id="showExistItemModal"  role="dialog" aria-labelledby="itemModalLabel">
+                <div class="modal-dialog  modal-lg" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+				          <h4 class="modal-title">Modal Heading</h4>
+				          <button type="button" class="close" data-dismiss="modal">&times;</button>
+				        </div>
+                        <div class="modal-body">
+<!-- 	                        <table id="itemjqGrid" class="table table-bordered"> -->
+<!-- 	                        </table> -->
+<!-- 	                        <div id="itemjqGridPager"></div> -->
+                        	 <table id="showExistItemTable" class="table">
+								  <thead>
+								    <tr>
+								      <th>部件号</th>
+								      <th>描述</th>
+									  <th>型号</th>
+									  <th>品牌</th>
+									  <th>VMI</th>
+									  <th>状态</th>
+<!-- 									  <th>安全库存数</th> -->
+<!-- 									  <th>单位</th> -->
+<!-- 									  <th>有效期</th> -->
+								    </tr>
+								  </thead>
+								  <tbody>
+								  </tbody>
+							</table>								
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                            <button type="submit" class="btn btn-primary" id="continueAddButton">继续添加</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- /.modal -->
+        </div>
+        
+        
+    	<div class="content">
+            <!-- 模态框（Modal） -->
+            <div class="modal fade" id="showInvModal" tabindex="-1"   role="dialog" aria-labelledby="showInvModalLabel">
+                <div id="showInvDialog" class="modal-dialog"  role="document" style="max-width: 500px!important;">
+                    <div class="modal-content">
+                        <div class="modal-header">
+				          <h4 class="modal-title">Modal Heading</h4>
+				          <button type="button" class="close" data-dismiss="modal">&times;</button>
+				        </div>
+                        <div class="modal-body" id="showInv">
+                        	<div id="msg"><strong>2/10条记录</strong> </div>
+                            <table id="showInvTable" class="table table-bordered">
+                             <thead>
+							    <tr>
+							      <th>部件号</th>
+								  <th>部件描述</th>
+								  <th>当前库存数</th>
+							    </tr>
+							  </thead>
+							  <tbody>
+							  </tbody>
+                        	</table>                      	
+                        </div>
+                        <div class="modal-footer">                        	
+                        	<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                        	<button type="button" class="btn btn-primary"  id="disableButton">停用</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- /.modal -->
+        </div>
+    <!-- /.content-wrapper -->
     </div>
     <!-- /.content-wrapper -->
     <!-- 引入页脚footer-fragment -->
@@ -167,6 +256,7 @@
 <script th:src="@{/inventory/plugins/jQueryUI/jquery-ui.min.js}"></script>
 <!-- Bootstrap 4 -->
 <script th:src="@{/inventory/plugins/bootstrap/js/bootstrap.bundle.min.js}"></script>
+<script th:src="@{/inventory/plugins/bootstrap/js/bootstrap-validate.js}"></script>
 <!-- AdminLTE App -->
 <script th:src="@{/inventory/dist/js/adminlte.min.js}"></script>
 <script th:src="@{/inventory/plugins/jqgrid-5.3.0/jquery.jqGrid.min.js}"></script>

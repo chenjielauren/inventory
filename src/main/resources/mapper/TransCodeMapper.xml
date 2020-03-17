@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.silgan.inventory.dao.TransCodeMapper" > 
+  <resultMap id="BaseResultMap" type="com.silgan.inventory.entity.TransCode" >
+    <result column="from_inv" property="fromInv" jdbcType="VARCHAR" />
+    <result column="to_inv" property="toInv" jdbcType="VARCHAR" />
+    <result column="operator" property="operator" jdbcType="VARCHAR" />
+  </resultMap>   
+  <resultMap id="TransCodeResultMap" type="com.silgan.inventory.vo.TransCodeListVO" >
+    <result column="trans_key" property="transKey" jdbcType="VARCHAR" />
+    <result column="operator" property="operator" jdbcType="VARCHAR" />
+  </resultMap> 
+  <sql id="Base_Column_List">
+    from_inv,to_inv,operator
+  </sql>
+ <select id="selectTransCodeKey"  resultMap="TransCodeResultMap">
+   select CONCAT(from_inv,to_inv) as trans_key,operator 
+	from tb_trans_code 
+	order by CONCAT(from_inv,to_inv)      
+  </select> 
+</mapper>

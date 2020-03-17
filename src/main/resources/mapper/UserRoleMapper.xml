@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.silgan.inventory.dao.UserRoleMapper" >
+  <resultMap id="BaseResultMap" type="com.silgan.inventory.entity.UserRole" >
+    <id column="user_name" property="userName" jdbcType="VARCHAR" />
+    <result column="role_name" property="roleName" jdbcType="VARCHAR" />
+    <result column="full_name" property="fullName" jdbcType="VARCHAR" />
+    <result column="vend_id" property="vendId" jdbcType="VARCHAR" />
+  </resultMap>
+  <select id="selectByUserName" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select distinct user_name, role_name
+    from tb_userrole
+    where user_name = #{userName,jdbcType=VARCHAR}
+  </select>
+  
+   <select id="selectVendorByUserName" resultType="java.lang.String" parameterType="java.lang.String" >
+    select vend_id
+    from tb_userrole  where user_name = #{userName,jdbcType=VARCHAR}
+  </select>
+  
+   <select id="selectUserByMap" resultMap="BaseResultMap" parameterType="Map" >
+    select distinct user_name, role_name,full_Name
+    from tb_userrole where 1=1
+    <if test="userNames!=null">
+        AND user_name in
+        <foreach collection="userNames" item="userName" separator=","
+            open="(" close=")">
+            #{userName}
+        </foreach>
+     </if>
+  </select>
+</mapper>

@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<header th:replace="inventory/header::header-fragment"></header>
+<body class="hold-transition sidebar-mini">
+<link th:href="@{/inventory/plugins/select2/select2.css}" rel="stylesheet"/>
+<link th:href="@{/inventory/plugins/datetimepick/css/tempusdominus-bootstrap-4.css}" rel="stylesheet"/>
+<link th:href="@{/inventory/plugins/inputpick/css/jquery.inputpicker.css}" rel="stylesheet"/>
+<style>
+    .ui-jqgrid tr.jqgrow td {
+        white-space: normal !important;
+        height: auto;
+        vertical-align: text-top;
+        padding-top: 2px;
+    }
+/*     .table td ,.table th { */
+/*     	border: 1px solid #dee2e6; */
+/* 	} */
+
+     .table th { 
+     	border-bottom: 1px solid #dee2e6; 
+ 	} 
+    
+ }
+    
+</style>
+<div class="wrapper">
+    <!-- 引入页面头header-fragment -->
+    <div th:replace="inventory/header::header-nav"></div>
+    <!-- 引入工具栏sidebar-fragment -->
+    <div th:replace="inventory/sidebar::sidebar-fragment(${path})"></div>
+    <!-- Content Wrapper. Contains page content -->
+    <div class="content-wrapper">
+        <!-- Content Header (Page header) -->
+        <div class="content-header">
+            <div class="container-fluid">
+            </div><!-- /.container-fluid -->
+        </div>
+        <!-- Main content -->
+        <div class="content">
+       
+            <div class="container-fluid">
+                <div class="card card-primary card-outline">
+                    <div class="card-header">
+                        <h3 class="card-title">查看领料计划</h3>
+                    </div> <!-- /.card-body -->
+                    <div class="card-body">
+						 <div class="grid-btn">
+                        	<label for="mpNumber" class="control-label col-1" style="padding-top: 5px;width: 5%">预约号:</label>
+                        	<input class="form-control  col-1" id="mpNumber" type="text" />
+                        	<label for="createUser" class="control-label col-1" style="padding-top: 5px;width: 5%">预约人:</label>
+                        	<input class="form-control  col-1" id="createUser" type="text" />
+                        	<label for="toInv" class="control-label  col-1" style="padding-top: 5px;width: 5%">预约状态:</label>&nbsp;&nbsp;&nbsp;
+                        	<select class="form-control select2 col-1" id="state">
+								<option value="-1" selected="selected">All</option>
+							    <option value="0">未完成</option>
+							    <option value="1">已完成</option>
+							    <option value="2">已取消</option>
+							</select>&nbsp;&nbsp;&nbsp;
+							<label for="startDate" class="control-label col-1" style="padding-top: 5px;width: 5%">预约开始日期:</label>
+							<input type="text" class="form-control datetimepicker-input col-1" name="startDate" id="startDate" data-toggle="datetimepicker" data-target="#startDate">
+							<label for="endDate" class="control-label col-1" style="padding-top: 5px;width: 5%">预约结束日期:</label>
+							<input type="text" class="form-control datetimepicker-input col-1" name="endDate" id="endDate" data-toggle="datetimepicker" data-target="#endDate">&nbsp;&nbsp;&nbsp;                         	
+                        	<button class="btn btn-info"   id="invsearch" onclick="search()"><i
+                                    class="fa fa-search"></i>&nbsp;搜索
+                            </button>&nbsp;&nbsp;&nbsp;&nbsp; 
+						</div>
+						                         
+                        <table id="jqGrid" class="table table-bordered"  style="display: block;">
+                        </table>
+                        <div id="jqGridPager"></div>
+                    </div><!-- /.card-body -->
+                </div>
+            </div><!-- /.container-fluid -->
+        </div>
+        <!-- /.content -->
+        
+        <div class="content">
+            <!-- 模态框（Modal） -->
+            <div class="modal fade" id="showMpModal"  role="dialog" aria-labelledby="mpModalLabel">
+                <div class="modal-dialog modal-full" role="document" style="min-width: 55%">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                          <h2 class="modal-title mx-auto">Modal Heading</h2>
+				          <button type="button" class="close ml-1" data-dismiss="modal">&times;</button>
+				        </div>
+                        <div class="modal-body">
+                        	<div class="row">
+	                        	<div id="showMp"  class="col-10" style="float:left;"></div>
+								<div id="barcodeTarget" class="col-2 pull-right" style="width:100%"></div>
+                        	</div>
+                        	<div class="table-responsive">
+                        	 <table id="showItemTable" class="table" style="width: 100%" data-toggle="table">
+								  <thead>
+								    <tr>
+								      <th style="width: 7%;">部件号</th>
+								      <th style="width: 19%; ">描述</th>
+								      <th style="width: 16%; ">品牌</th>
+									  <th style="width: 16%; ">型号</th>
+									  <th style="width: 9%;text-align:right">预约数</th>
+									  <th style="width: 12%;">库位</th>
+                                      <th style="width: 9%;text-align:right">数量</th>
+                                      <th style="width: 12%;">入库日期</th>
+								    </tr>
+								  </thead>
+								  <tbody>
+								  </tbody>
+							</table>
+							</div>
+                        </div>
+                        <div class="modal-footer">
+                        	<button type="button" class="btn btn-primary mr-auto" onclick="printMp()">打印</button>
+                        	<button type="button" class="btn btn-success" onclick="checkDoneMp()" id="stateBtn">已完成</button>
+                            <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- /.content-wrapper -->
+    <!-- 引入页脚footer-fragment -->
+    <div th:replace="inventory/footer::footer-fragment"></div>
+</div>
+<!-- <iframe id="print_frame" name="print_frame" width="0" height="0" frameborder="0" src="about:blank" style="position:absolute;"></iframe>  -->
+<iframe id="print_frame" name="print_frame"  width="0" height="0" left="-600px" top="-600px"  style="display:none;position:absolute;"></iframe> 
+
+<div id="printdiv" style="display:none;">
+<!-- 	<div style="float:right;width:50px;font-size:12px;font-weight:normal">page</div> -->
+	<div id="content">
+	  <div id="pageFooter" style="float:right;width:80px;font-size:12px;font-weight:normal;margin-top: 10px;">Page </div>		    
+	</div>
+     <div id="container">
+		  <div id="left"><img src="/inventory/dist/img/Silgan_RGB.png" alt="Smiley face" width="100%" height="auto"></div>
+		  <div id="center"><h1  style="font-weight:normal;">领料单</h1></div>
+		  <div id="printqrcode" style="text-align:right"></div>
+	</div>
+	 <!--  预约时间  -->
+	<div id="mptime" style="float:right;margin-top:-10px;margin-right:34px;font-size:16px;"></div>
+    <table id="msgTable" class="main" cellspacing="0" cellpadding="5"  border-collapse="separate" 
+	     width="100%">
+		  <tbody>
+		  	<tr>
+		  		<td style="width:7%;font-weight: bold;">预约人</td>
+		  		<td style="width:10%;text-align: left;"></td>
+		  		<td style="width:83%;"></td>
+		  	</tr>
+		  </tbody>
+	   </table>	
+	<table id="printTable" cellspacing="0" cellpadding="5"  border-collapse="separate" 
+	     width="100%" style=" border-spacing:0px 10px;margin-top:20px;border-bottom: 1px solid #000000;">
+	        <thead >
+		    <tr style="text-align: left;">
+		      <th style="width: 5%;font-weight: bold; ">序号</th>
+		      <th style="width: 7%;font-weight: bold; ">部件号</th>
+		      <th style="width: 19%;font-weight:bold; ">描述</th>
+		      <th style="width: 15%;font-weight: bold; ">品牌</th>
+			  <th style="width: 15%;font-weight: bold; ">型号</th>
+			  <th style="width: 9%;font-weight: bold;text-align:right;">预约数</th>
+			  <th style="width: 12%;font-weight: bold; ">库位</th>
+              <th style="width: 8%;font-weight: bold;text-align:right;">数量</th>
+              <th style="width: 10%;font-weight: bold; ">入库日期</th>
+		    </tr>
+		  </thead>
+		  <tbody>
+		  </tbody>
+	   </table>	
+		<table id="totalTable" class="main" cellspacing="0" cellpadding="5"  border-collapse="separate" 
+	     width="100%">
+		  <tbody>
+		  	<tr>
+		  		<td style="width:74%;"></td>
+		  		<td style="width:8%;font-weight: bold;text-align:left;">总计</td>
+		  		<td style="width:8%;text-align:right;"></td>
+		  		<td style="width:10%;"></td>
+		  	</tr>
+		  </tbody>
+	   </table>	
+	    <table id="userTable" class="main" cellspacing="0" cellpadding="5"  border-collapse="separate" 
+	     width="100%">
+		  <tbody>
+		  	<tr>
+		  		<td style="width:7%;font-weight: bold;">制单人:</td>
+		  		<td style="width:30%;"></td>
+		  		<td style="width:8%;font-weight: bold;">打印时间:</td>
+		  		<td style="width:18%;" id="printDate"></td>
+		  		<td style="width:7%;font-weight: bold;">领料人:</td>
+		  		<td style="width:30%;"></td>
+		  	</tr>
+		  </tbody>
+	   </table>	
+</div>
+<!-- jQuery -->
+<script th:src="@{/inventory/plugins/jquery/jquery.min.js}"></script>
+<!-- <script type="text/javascript" src="https://code.jquery.com/jquery-1.12.4.min.js"></script> -->
+<!-- jQuery UI 1.11.4 -->
+<script th:src="@{/inventory/plugins/jQueryUI/jquery-ui.min.js}"></script>
+<script th:src="@{/inventory/plugins/inputpick/js/jquery.inputpicker.js}"></script>
+<!-- Bootstrap 4 -->
+<script th:src="@{/inventory/plugins/bootstrap/js/bootstrap.bundle.min.js}"></script>
+<!-- AdminLTE App -->
+<script th:src="@{/inventory/dist/js/adminlte.min.js}"></script>
+<script th:src="@{/inventory/plugins/jqgrid-5.3.0/jquery.jqGrid.min.js}"></script>
+<script th:src="@{/inventory/plugins/jqgrid-5.3.0/grid.locale-cn.js}"></script>
+<!-- sweetalert -->
+<script th:src="@{/inventory/plugins/sweetalert/sweetalert.min.js}"></script>
+<!-- Select2 -->
+<script th:src="@{/inventory/plugins/select2/select2.full.min.js}"></script>
+<!-- datetime -->
+<script th:src="@{/inventory/plugins/datetimepick/js/moment.js}"></script>
+<script th:src="@{/inventory/plugins/datetimepick/js/tempusdominus-bootstrap-4.js}"></script>
+<!-- barcode -->
+
+<script th:src="@{/inventory/plugins/barcode/jquery-barcode.js}"></script>
+<!-- qrcode -->
+<!-- <script th:src="@{/inventory/plugins/qrcode/qrcode.js}"></script> -->
+<script th:src="@{/inventory/dist/js/public.js}"></script>
+<script th:src="@{/inventory/dist/js/mpsearch.js}"></script>
+</body>
+</html>

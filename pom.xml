@@ -19,7 +19,7 @@
 	</properties>
 
 	<dependencies>
-		<!-- ldap -->
+		<!-- ldap start-->
 		<dependency>
           <groupId>org.springframework.boot</groupId>
           <artifactId>spring-boot-starter-security</artifactId>
@@ -36,6 +36,7 @@
           <groupId>org.springframework.security</groupId>
           <artifactId>spring-security-ldap</artifactId>
         </dependency>
+        <!-- ldap end-->
 		<!-- thymeleaf -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -85,7 +86,6 @@
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
-			<version>2.9.8</version>
 		</dependency>
 
 	</dependencies>

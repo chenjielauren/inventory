@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.silgan.inventory.dao.MaterialPlanMapper" >
+  <resultMap id="BaseResultMap" type="com.silgan.inventory.entity.MaterialPlan" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="item_number" property="itemNumber" jdbcType="VARCHAR" />
+    <result column="qty" property="qty" jdbcType="INTEGER" />
+    <result column="mp_time" property="mpTime" jdbcType="TIMESTAMP" />
+    <result column="create_user" property="createUser" jdbcType="VARCHAR" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="note" property="note" jdbcType="VARCHAR" />
+    <result column="mp_number" property="mpNumber" jdbcType="VARCHAR" />
+    <result column="state" jdbcType="TINYINT" property="state" />
+  </resultMap>
+   <resultMap id="MpResultMap" type="com.silgan.inventory.vo.MpListVO" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="item_number" property="itemNumber" jdbcType="VARCHAR" />
+    <result column="qty" property="qty" jdbcType="INTEGER" />
+    <result column="mp_time" property="mpTime" jdbcType="TIMESTAMP" />
+    <result column="create_user" property="createUser" jdbcType="VARCHAR" />
+    <result column="full_name" property="fullName" jdbcType="VARCHAR" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="note" property="note" jdbcType="VARCHAR" />
+    <result column="mp_number" property="mpNumber" jdbcType="VARCHAR" />
+    <result column="state" jdbcType="TINYINT" property="state" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    id, item_number, qty, mp_time, create_user, create_time, note, mp_number,state
+  </sql>
+  <sql id="MP_Column_List">
+    id, item_number, qty, mp_time, create_user, create_time, note, mp_number,state,full_name
+  </sql>
+  <delete id="deleteByMp" parameterType="java.lang.String" >
+    delete from tb_material_plan
+    where mp_number = #{mpNumber,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="com.silgan.inventory.entity.MaterialPlan" >
+     <selectKey resultType="java.lang.Integer" keyProperty="id" order="AFTER" >
+      SELECT LAST_INSERT_ID()
+    </selectKey>
+    insert into tb_material_plan (id, item_number, qty, 
+      mp_time, create_user, create_time, 
+      note, mp_number,state)
+    values (#{id,jdbcType=INTEGER}, #{itemNumber,jdbcType=VARCHAR}, #{qty,jdbcType=INTEGER}, 
+      #{mpTime,jdbcType=TIMESTAMP}, #{createUser,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP}, 
+      #{note,jdbcType=VARCHAR}, #{mpNumber,jdbcType=VARCHAR}, #{state,jdbcType=TINYINT})
+  </insert>
+  <update id="updateByPrimaryKey" parameterType="com.silgan.inventory.entity.MaterialPlan" >
+    update tb_material_plan
+    set item_number = #{itemNumber,jdbcType=VARCHAR},
+      qty = #{qty,jdbcType=INTEGER},
+      mp_time = #{mpTime,jdbcType=TIMESTAMP},      
+      note = #{note,jdbcType=VARCHAR},
+      mp_number = #{mpNumber,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="checkDone" parameterType="Map">
+      update tb_material_plan
+      set state=1 where mp_number = #{mpNumber,jdbcType=VARCHAR}
+      and state = 0
+  </update>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List"/>
+    from tb_material_plan
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <select id="selectByMap" resultMap="MpResultMap" parameterType="Map">
+    select <include refid="MP_Column_List"/>
+    from tb_material_plan left join (select distinct user_name, role_name,full_name from tb_userrole) u on create_user=user_name where 1=1
+    <if test="itemNumber!=null and itemNumber!= ''">
+         AND item_number = #{itemNumber,jdbcType=VARCHAR}
+    </if> 
+    <if test="mpNumber!=null and mpNumber!= ''">
+         AND mp_number = #{mpNumber,jdbcType=VARCHAR}
+    </if>
+    <if test="userName!=null and userName!= ''">
+         AND create_user = #{userName,jdbcType=VARCHAR}
+    </if>
+    <if test="state!=null">
+         AND state = #{state,jdbcType=TINYINT}
+    </if>
+    <if test="states!=null">
+        AND state in
+        <foreach item="state" collection="states" open="(" separator="," close=")">
+         	#{state}
+     	</foreach>
+    </if>       
+    order by mp_number
+  </select>
+  <select id="selectExistQty" resultMap="BaseResultMap"  parameterType="Map">
+    select item_number,sum(qty) as qty from tb_material_plan where state in (0,1)
+    <if test="itemNumber!=null and itemNumber!= ''">
+         AND item_number = #{itemNumber,jdbcType=VARCHAR}
+    </if> 
+    <if test="itemNumbers!=null">
+        AND item_number in
+        <foreach collection="itemNumbers" item="itemNumber" separator=","
+            open="(" close=")">
+            #{itemNumber}
+        </foreach>
+    </if>
+    group by item_number
+  </select> 
+  <select id="findMpList" parameterType="Map" resultMap="MpResultMap">
+    select sum(qty) as qty, mp_number,create_user,full_name,mp_time,state from tb_material_plan left join (select distinct user_name, role_name,full_name from tb_userrole) u on create_user=user_name where mp_number !=''
+    <if test="mpNumber!=null and mpNumber != ''">
+         AND mp_number like CONCAT('%',#{mpNumber},'%')
+    </if>  
+    <if test="startDate!=null">
+         AND SUBSTR(mp_time,1,10) &gt;= #{startDate}
+    </if> 
+    <if test="endDate!=null">
+         AND SUBSTR(mp_time,1,10) &lt;= #{endDate}
+    </if>
+    <if test="userName!=null and userName!= ''">
+         AND full_name like CONCAT('%',#{userName},'%')
+    </if>
+    <if test="state!=null and state!=-1">
+         AND state = #{state}
+    </if>
+      group by state,mp_time,mp_number,create_user     
+      order by state,mp_time,mp_number,create_user
+    <if test="start!=null and limit!=null">
+        limit #{start},#{limit}
+    </if>    
+  </select>
+  
+  <select id="getTotalMps" parameterType="Map" resultType="int">
+    with mp_table as (select sum(qty) as qty, mp_number,create_user,mp_time,state from tb_material_plan where mp_number !=''
+    <if test="mpNumber!=null and mpNumber != ''">
+         AND mp_number like CONCAT('%',#{mpNumber},'%')
+    </if>  
+    <if test="startDate!=null">
+         AND SUBSTR(mp_time,1,10) &gt;= #{startDate}
+    </if> 
+    <if test="endDate!=null">
+         AND SUBSTR(mp_time,1,10) &lt;= #{endDate}
+    </if>
+    <if test="userName!=null and userName!= ''">
+         AND create_user like CONCAT('%',#{userName},'%')
+    </if>
+    <if test="state!=null and state!=-1">
+         AND state = #{state}
+    </if>
+      group by state,mp_time,mp_number,create_user     
+      order by state,mp_time,mp_number,create_user
+      )select count(*) from mp_table    
+  </select>
+  
+ <select id="lockTable" >
+   LOCK TABLES tb_material_plan WRITE,tb_inv as inv READ,tb_trans_code READ
+  </select>
+  <select id="unlockTable" >
+   UNLOCK TABLES
+  </select>
+  <update id="cancelMp" parameterType="java.lang.String" >
+      update tb_material_plan
+      set state=2 where mp_number = #{mpNumber,jdbcType=VARCHAR}
+  </update>
+</mapper>

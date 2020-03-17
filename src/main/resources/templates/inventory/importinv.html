@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<header th:replace="inventory/header::header-fragment"></header>
+<body class="hold-transition sidebar-mini">
+<link th:href="@{/inventory/plugins/select2/select2.css}" rel="stylesheet"/>
+<link th:href="@{/inventory/plugins/datetimepick/css/tempusdominus-bootstrap-4.css}" rel="stylesheet"/>
+<link th:href="@{/inventory/plugins/inputpick/css/jquery.inputpicker.css}" rel="stylesheet"/>
+<style>
+    .ui-jqgrid tr.jqgrow td {
+        white-space: normal !important;
+        height: auto;
+        vertical-align: text-top;
+        padding-top: 2px;
+    }
+    
+</style>
+<div class="wrapper">
+    <!-- 引入页面头header-fragment -->
+    <div th:replace="inventory/header::header-nav"></div>
+    <!-- 引入工具栏sidebar-fragment -->
+    <div th:replace="inventory/sidebar::sidebar-fragment(${path})"></div>
+    <!-- Content Wrapper. Contains page content -->
+    <div class="content-wrapper">
+        <!-- Content Header (Page header) -->
+        <div class="content-header">
+            <div class="container-fluid">
+            </div><!-- /.container-fluid -->
+        </div>
+        <!-- Main content -->
+        <div class="content">
+            <div class="container-fluid">
+                <div class="card card-primary card-outline">
+                    <div class="card-header">
+                        <h3 class="card-title">VMI入库</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="grid-btn">
+                        	<label for="vmiInv" class="control-label col-2" style="padding-top: 5px">选择供应商:</label>
+							<select class="form-control select2  col-4" id="vmiInv" onchange="changeVmi()">
+							    <option th:each="c : ${vendorList}" th:value="${c.vendId + ',' +c.vmiInv}" th:text="${c.vendName}"
+	      							></option>
+							</select>&nbsp;&nbsp;&nbsp;
+							<label class="control-label" style="padding-top: 5px;display:none;color:blue;" id="invCodeLabel"></label>&nbsp;&nbsp;&nbsp;
+							<button class="btn btn-info" onclick="save()">&nbsp;保存
+                            </button>   
+                        </div>
+                        <div class="form-group">
+                             <div class="alert alert-danger" id="edit-error-msg" style="display: none;">
+                                 	错误信息展示栏。
+                             </div>
+                         </div>
+                         <div class="table-responsive" style="min-height: 600px;" >
+	                        <table id="table" class="table table-bordered" style="overflow-x: auto;width: 1700px;">
+	                        	<thead>
+	                        	  <tr>
+	                        	  	  <th style="width: 2%">
+									  <th style="width: 400px">部件号</th>
+									  <th style="width: 300px">部件描述/品牌/型号</th>
+									  <th style="width: 140px">当前库存数</th>
+									  <th style="width: 185px">入库数</th>
+									  <th style="width: 170px">批号</th>
+									  <th style="width: 200px">日期</th>
+									  <th style="width: 500px">备注</th>
+								  </tr>
+								</thead>
+								<tbody>
+							    </tbody>
+	                        </table>
+	                      </div>
+                        <div class="row">
+                        	<button id="addRow"  type="button" class="btn btn-default btn-xs" aria-label="Left Align" style="display: none;">
+							  <span class="fa fa-plus" aria-hidden="true"></span>
+							</button>&nbsp;&nbsp;
+							<button id="removeRow"  type="button" class="btn btn-default btn-xs" aria-label="Left Align">
+							  <span class="fa fa-minus" aria-hidden="true"></span>
+							</button>&nbsp;&nbsp;
+                        </div>
+                    </div><!-- /.card-body -->
+                </div>
+            </div><!-- /.container-fluid -->
+        </div>
+    	<div class="content">
+            <!-- 模态框（Modal） -->
+            <div class="modal fade" id="invModal" tabindex="-1" role="dialog"  aria-labelledby="invModalLabel">
+                <div class="modal-dialog modal-full" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+				          <h4 class="modal-title">Modal Heading</h4>
+				          <button type="button" class="close" data-dismiss="modal">&times;</button>
+				        </div>
+                        <div class="modal-body" style="overflow-x: auto;">
+                            <table id="showTable" class="table" style="width: 100%">
+								  <thead>
+								    <tr>
+								      <th style="width: 5%">ID</th>
+								      <th style="width: 10%">部件号</th>
+								      <th style="width: 20%">部件描述/型号/品牌</th>
+									  <th style="width: 10%">当前库存数</th>
+									  <th style="width: 10%">入库数</th>
+									  <th style="width: 15%">入库后数量</th>
+									  <th style="width: 10%">批号</th>
+									  <th style="width: 10%">日期</th>
+									  <th style="width: 10%">备注</th>
+								    </tr>
+								  </thead>
+								  <tbody>
+								  </tbody>
+							</table>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal">取消</button>
+                            <button type="button" class="btn btn-primary" id="saveButton">确认</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- /.modal -->
+        </div>
+    </div>
+    <!-- /.content-wrapper -->
+    <input  id="itemList" style="display: none;">
+	
+    <!-- 引入页脚footer-fragment -->
+    <div th:replace="inventory/footer::footer-fragment"></div>
+</div>
+<!-- jQuery -->
+<script th:src="@{/inventory/plugins/jquery/jquery.min.js}"></script>
+<!-- jQuery UI 1.11.4 -->
+<script th:src="@{/inventory/plugins/jQueryUI/jquery-ui.min.js}"></script>
+<script th:src="@{/inventory/plugins/inputpick/js/jquery.inputpicker.js}"></script>
+<!-- Bootstrap 4 -->
+<script th:src="@{/inventory/plugins/bootstrap/js/bootstrap.bundle.min.js}"></script>
+<!-- AdminLTE App -->
+<script th:src="@{/inventory/dist/js/adminlte.min.js}"></script>
+<script th:src="@{/inventory/plugins/jqgrid-5.3.0/grid.locale-cn.js}"></script>
+<!-- sweetalert -->
+<script th:src="@{/inventory/plugins/sweetalert/sweetalert.min.js}"></script>
+<!-- Select2 -->
+<script th:src="@{/inventory/plugins/select2/select2.full.min.js}"></script>
+<!-- datetime -->
+<script th:src="@{/inventory/plugins/datetimepick/js/moment.js}"></script>
+<script th:src="@{/inventory/plugins/datetimepick/js/tempusdominus-bootstrap-4.js}"></script>
+<!-- validate -->
+<!-- <script th:src="@{/inventory/plugins/datetimepick/js/bootstrap-validate.js}"></script> -->
+<script th:src="@{/inventory/dist/js/public.js}"></script>
+<script th:src="@{/inventory/dist/js/importinv.js}"></script>
+</body>
+</html>
