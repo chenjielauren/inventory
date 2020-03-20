@@ -119,6 +119,7 @@ public class ItemServiceImpl implements ItemService {
 	public String selectItems() {
 		Map<String,Object> map = new HashMap<String,Object>();
 		map.put("state", 1);
+		map.put("vmi", 0);//不需要VMIList
 		List<Item> itemList = itemMapper.selectItems(map);
 		return CommonUtil.convertListToJson(itemList);
 	}

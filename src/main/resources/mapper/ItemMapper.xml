@@ -156,7 +156,13 @@
     <include refid="Base_Column_List"/>
     from tb_item where 1=1
     <if test="state!=null">
-    	and  state = 1 
+    	and  state =  #{state} 
+    </if>
+    <if test="vmi!=null and vmi==0">    	
+    	and item_number not in (select distinct item_number from tb_item_vendor)
+    </if>
+    <if test="vmi!=null and vmi==1">    	
+    	and item_number in (select distinct item_number from tb_item_vendor)
     </if>
     <if test="itemNumbers!=null">
         AND item_number in

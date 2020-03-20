@@ -62,4 +62,7 @@ public interface InvService {
 	List<MpListVO> selectByMp(String mpNumber);
 
 	Boolean cancelMp(String mpNumber);
+
+	PageResult getInvQtyPage(PageQueryUtil pageUtil);
+	
 }

@@ -15,7 +15,7 @@
   <select id="selectInvCodeByVmi" parameterType="Map" resultMap="InvCodeMap" >
     select distinct inv_code,inv_desc	
     from tb_inv_code where 1 = 1
-    <if test="vmi!=null and vmi!=''">
+    <if test="vmi!=null">
          and vmi = #{vmi}
     </if>
     order by inv_rank

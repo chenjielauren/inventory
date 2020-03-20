@@ -33,7 +33,11 @@ public class InvListVO {
     private String toLoc;
 
     private Integer qty;
+    
+    private Integer mpQty;
 
+    private Integer allowQty;
+    
     private String lotNumber;
 
     @JsonFormat(pattern = "yyyy-MM-dd")
@@ -60,6 +64,8 @@ public class InvListVO {
     private String  vendorName;
 
     private String  vmiInv;
+    
+    private String invName;
     
     private String locName;
     
@@ -177,6 +183,22 @@ public class InvListVO {
 
 	public void setQty(Integer qty) {
 		this.qty = qty;
+	}
+	
+	public Integer getMpQty() {
+		return mpQty;
+	}
+
+	public void setMpQty(Integer mpQty) {
+		this.mpQty = mpQty;
+	}
+	
+	public Integer getAllowQty() {
+		return allowQty;
+	}
+
+	public void setAllowQty(Integer allowQty) {
+		this.allowQty = allowQty;
 	}
 
 	public String getLotNumber() {
@@ -299,5 +321,12 @@ public class InvListVO {
 		this.fullName = fullName;
 	}
 
+	public String getInvName() {
+		return invName;
+	}
 
+	public void setInvName(String invName) {
+		this.invName = invName;
+	}
+	
 }

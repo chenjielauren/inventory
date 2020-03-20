@@ -75,6 +75,18 @@
      <if test="itemNumber!=null and itemNumber!=''">
          AND item_number = #{itemNumber,jdbcType=VARCHAR}
     </if>  
+    <if test="invName!=null and invName!=''">
+	 and (from_inv = #{invName} or to_inv = #{invName})  
+	</if>
+	<if test="locName!=null and locName!=''">
+	 and (from_loc = #{locName} or to_loc = #{locName})  
+	</if>
+	<if test="vmi!=null and vmi==0">
+	 and item_number not in (select distinct item_number from tb_item_vendor) 
+	</if>
+	<if test="vmi!=null and vmi==1">
+	 and item_number in (select distinct item_number from tb_item_vendor)  
+	</if>
     <if test="itemNumbers!=null">
         AND item_number in
         <foreach collection="itemNumbers" item="itemNumber" separator=","
@@ -82,11 +94,14 @@
             #{itemNumber}
         </foreach>
     </if>
+   order by item_number desc
   </select>
+ 
   <select id="findInvList" parameterType="Map" resultMap="InvResultMap">
     select id, item_number, from_inv, to_inv, from_loc, to_loc, qty, lot_number, inv_time,
     create_user, create_time,note,ic_number,price,amount,full_Name
-    from tb_inv left join (select distinct user_name, role_name,full_name from tb_userrole) u on create_user=user_name   where 1=1
+    from tb_inv left join (select distinct user_name, role_name,full_name from tb_userrole) u on create_user=user_name   
+    where item_number not in (select distinct item_number from tb_item_vendor)
      <if test="itemNumber!=null and itemNumber!=''">
          AND item_number CONCAT('%',#{itemNumber},'%')
     </if>    

@@ -132,15 +132,13 @@ public class InvController {
     	model.addAttribute("userRole", roleName);    	
     	model.addAttribute("itemList", itemService.selectItems());
     	model.addAttribute("mpList", invService.selectMpList(u));
-//    	model.addAttribute("doneList", invService.selectDoneList(userMap));
-//    	model.addAttribute("cancelList", invService.selectCancelList(userMap));
     	if(null!=roleName  &&( roleName.equals(Constant.ROLE_ADMIN)|| roleName.equals(Constant.ROLE_INV_ADD))) 
     		return "inventory/mp";
     	return "inventory/accessDenied";
     }
 	
 	/**
-	 * VMI入库记录查询
+	 * 查看领料计划
 	 */
 	@GetMapping("/mpsearch")
     public String mpsearch(Model model) {
@@ -153,6 +151,49 @@ public class InvController {
     	model.addAttribute("userRole", roleName);
     	if(null!=roleName  &&( roleName.equals(Constant.ROLE_ADMIN)|| roleName.equals(Constant.ROLE_INV_ADD))) 
     		return "inventory/mpsearch";
+    	return "inventory/accessDenied";
+    }
+	
+	
+	/**
+	 * 库存查询界面
+	 */
+	@GetMapping("/invqtysearch")
+    public String invqtysearch(Model model,@RequestParam(name="itemNumber",required = false) Integer itemNumber) {
+		model.addAttribute("path", "invqtysearch");
+		model.addAttribute("title", "库存查询");
+		UserRole u = userRoleService.getUser();;
+		model.addAttribute("fullName", u.getFullName());
+		model.addAttribute("itemList", itemService.selectItems());
+        model.addAttribute("codeList", invService.findInvCodeList());
+        List<Location> locList = invService.findLocationList();
+        model.addAttribute("locList", locList);   
+        UserRole userRole = userRoleService.selectByUserName(u.getUserName());
+    	String roleName= userRole.getRoleName();       	
+    	model.addAttribute("userRole", roleName);
+    	if(null!=roleName  &&( roleName.equals(Constant.ROLE_ADMIN)|| roleName.equals(Constant.ROLE_INV_SEARCH))) 
+    		return "inventory/invqtysearch";
+    	return "inventory/accessDenied";
+    }
+	
+	/**
+	 * 库存查询界面
+	 */
+	@GetMapping("/vmiqtysearch")
+    public String vmiqtysearch(Model model,@RequestParam(name="itemNumber",required = false) Integer itemNumber) {
+		model.addAttribute("path", "vmiqtysearch");
+		model.addAttribute("title", "库存查询");
+		UserRole u = userRoleService.getUser();;
+		model.addAttribute("fullName", u.getFullName());
+		model.addAttribute("itemList", itemService.selectItems());
+        model.addAttribute("codeList", invService.findInvCodeList());
+        List<Location> locList = invService.findLocationList();
+        model.addAttribute("locList", locList);   
+        UserRole userRole = userRoleService.selectByUserName(u.getUserName());
+    	String roleName= userRole.getRoleName();       	
+    	model.addAttribute("userRole", roleName);
+    	if(null!=roleName  &&( roleName.equals(Constant.ROLE_ADMIN)|| roleName.equals(Constant.ROLE_INV_SEARCH))) 
+    		return "inventory/vmiqtysearch";
     	return "inventory/accessDenied";
     }
 	
@@ -312,6 +353,20 @@ public class InvController {
     @ResponseBody
     public Result cancelMp(@PathVariable("mpNumber") String mpNumber) {
         return ResultGenerator.genSuccessResult(invService.cancelMp(mpNumber));
+    }
+    
+    /**
+     * 库存查询
+     */
+    @GetMapping(value = "/invs/invqtylist")
+    @ResponseBody
+    public Result invqtylist(Model model,@RequestParam Map<String, Object> params) {
+        if (StringUtils.isEmpty(params.get("page")) || StringUtils.isEmpty(params.get("limit"))) {
+            return ResultGenerator.genFailResult("参数异常！");
+        }
+        
+        PageQueryUtil pageUtil = new PageQueryUtil(params);  
+        return ResultGenerator.genSuccessResult(invService.getInvQtyPage(pageUtil));
     }
     
 }

@@ -91,6 +91,22 @@
 	                        </p>
 	                    </a>
 	                </li>
+	                <li class="nav-item">
+	                    <a th:href="@{/inventory/invqtysearch}" th:class="${path}=='invqtysearch'?'nav-link active':'nav-link'">
+	                        <i class="fa fa-bars nav-icon" aria-hidden="true"></i>
+	                        <p>
+	                                                库存查询	
+	                        </p>
+	                    </a>
+	                </li>
+	                <li class="nav-item">
+	                    <a th:href="@{/inventory/vmiqtysearch}" th:class="${path}=='vmiqtysearch'?'nav-link active':'nav-link'">
+	                        <i class="fa fa-envelope nav-icon" aria-hidden="true"></i>
+	                        <p>
+	                          VMI库存查询	
+	                        </p>
+	                    </a>
+	                </li>
 	                <li class="nav-header">物料管理</li>
 	                <li class="nav-item">
 	                    <a th:href="@{/inventory/items}" th:class="${path}=='items'?'nav-link active':'nav-link'">

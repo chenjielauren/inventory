@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
@@ -145,7 +146,9 @@ public class InvServiceImpl implements InvService{
 
 	@Override
 	public String selectInvs() {
-		List<InvCode> invCodes = invCodeMapper.selectInvCode();		
+		Map<String,Object> params = new HashMap<String,Object>();
+		params.put("vmi", 0);
+		List<InvCode> invCodes = invCodeMapper.selectInvCodeByVmi(params);		
 		return CommonUtil.convertListToJson(invCodes);
 	}
 
@@ -295,7 +298,7 @@ public class InvServiceImpl implements InvService{
 				List<InvListVO> list = entry.getValue();
 				Integer sumQty = this.calSumQty(list, transCodeMap);
 				retVO.setQty(sumQty);					
-				retVO.setState(sumQty == 0?false:true);//可禁用		
+				retVO.setState(sumQty == 0?false:true);//可禁用物料		
 				retList.add(retVO);				
 			}				
 		}
@@ -571,10 +574,19 @@ public class InvServiceImpl implements InvService{
 				invList.add(inv);
 			}
 		}
+		//Key:itemNumber,toLoc value:ToInv名称
+		Map<String,String> invLocMap = new HashMap<String,String>();
+		for(Inv inv:list) {
+			invLocMap.put(inv.getItemNumber()+","+inv.getToLoc(), inv.getToInv());
+		}
+		
+		//transCode 决定数量正负 交易代码
+		Map<String,String> transCodeMap = this.getTransCodeMap();
 		//返回值Map
 		Map<String,List<InvListVO>> retMap = new HashMap<String,List<InvListVO>>();
 		//分别获取fromLoc的qty总和与toLoc的qty总和,两者相减，获取数量不为0的库位
 		for (Map.Entry<String, List<Inv>> invEntry : invMap.entrySet()) {
+			String itemNumber = invEntry.getKey();
 			List<InvListVO> retList = new ArrayList<InvListVO>();
 			//key:fromLoc value:qty累加
 			Map<String,Integer> fromMap = new HashMap<String,Integer>();
@@ -582,8 +594,6 @@ public class InvServiceImpl implements InvService{
 			Map<String,Integer> toMap = new HashMap<String,Integer>();
 			//key:invTime value:invTime
 			Map<String,Date> invTimeMap = new HashMap<String,Date>();
-			//transCode 决定数量正负 交易代码
-			Map<String,String> transCodeMap = this.getTransCodeMap();
 			for(Inv inv :invEntry.getValue()) {
 				String operator = transCodeMap.get(inv.getFromInv()+inv.getToInv());
 				if(fromMap.get(inv.getFromLoc()) == null) {
@@ -604,20 +614,21 @@ public class InvServiceImpl implements InvService{
 			}
 			//遍历Map，将toMap的qty总和减去fromMap的qty总和
 			for (Map.Entry<String, Integer> entry : toMap.entrySet()) {
-				String key = entry.getKey();				
-				Integer minusQty = (toMap.get(key)!=null?toMap.get(key):0)-(fromMap.get(key)!=null?fromMap.get(key):0);
+				String locName = entry.getKey();				
+				Integer minusQty = (toMap.get(locName)!=null?toMap.get(locName):0)-(fromMap.get(locName)!=null?fromMap.get(locName):0);
 				if(minusQty !=0) {
 					InvListVO retVO = new InvListVO();
-					retVO.setLocName(key);
+					retVO.setInvName(invLocMap.get(itemNumber+","+locName));//库名称
+					retVO.setLocName(locName);//库位名称
 					retVO.setQty(minusQty);
-					retVO.setInvTime(invTimeMap.get(key));
+					retVO.setInvTime(invTimeMap.get(locName));
 					retList.add(retVO);	
 				}			
 			}
-			retMap.put(invEntry.getKey(), retList);
+			retMap.put(itemNumber, retList);
 		}
 		return retMap;
-	}
+	}	
 
 	@Override
 	public List<MpListVO> selectByMp(String mpNumber) {
@@ -643,6 +654,69 @@ public class InvServiceImpl implements InvService{
 		return mpMapper.cancelMp(mpNumber) > 0;
 	}
 
+	@Override
+	public PageResult getInvQtyPage(PageQueryUtil pageUtil) {
+		Map<String, List<InvListVO>> invMap = this.selectLocByMap(pageUtil);
+		Map<String, Item> itemMap = this.getItemMap();
+		List<InvListVO> retList = new ArrayList<InvListVO>();
+		Map<String,Integer> mpQtyMap = this.getMpQtyByItemNumbers(pageUtil);
+		for (Map.Entry<String, List<InvListVO>> invEntry : invMap.entrySet()) {
+			String itemNumber= invEntry.getKey();
+			boolean flag = true;
+			for(InvListVO vo:invEntry.getValue()) {				
+				InvListVO retVo = new InvListVO();
+				BeanUtils.copyProperties(vo, retVo);
+				Item item = itemMap.get(itemNumber);
+				retVo.setItemNumber(itemNumber);
+				retVo.setItemDesc(item.getItemDesc());
+				retVo.setItemBrand(item.getItemBrand());
+				retVo.setItemModel(item.getItemModel());
+				retVo.setItemUnit(item.getItemUnit());
+				retVo.setState(item.getState());
+				retVo.setSafeVmi(item.getSafeVmi());
+				Integer qty = vo.getQty()!=null? vo.getQty():0;//数量
+				Integer mpQty = mpQtyMap.get(itemNumber)!=null? mpQtyMap.get(itemNumber):0;//已预约数	
+				if(mpQty!=0 && mpQty >= qty && flag) {
+					mpQty -= qty;
+					mpQtyMap.put(itemNumber,mpQty);//更新已预约数量
+					continue;
+				}else {
+					retVo.setMpQty(mpQty);
+					retVo.setAllowQty(qty-mpQty);
+					mpQtyMap.put(itemNumber,0);
+					retList.add(retVo);
+					flag = false;
+				}
+			}
+		}
+		//排序
+		Collections.sort(retList, new Comparator<InvListVO>() {
+			@Override
+			public int compare(final InvListVO record1, final InvListVO record2) {
+				int c;
+			    c = record2.getState().compareTo(record1.getState());
+			    if (c == 0)
+			       c = Integer.valueOf(record2.getItemNumber()).compareTo(Integer.valueOf(record1.getItemNumber()));
+			    if (c == 0)
+			       c = record1.getInvName().compareTo(record2.getInvName());
+			    if (c == 0)
+				   c = record1.getLocName().compareTo(record2.getLocName());
+			    if (c == 0)
+			       c = record1.getQty().compareTo(record2.getQty());
+			    
+			    return c;
+			}
+		});
+		int lastIndex = 0;
+		if(retList.size()<(int)pageUtil.get("limit")*(int)pageUtil.get("page")) {
+			lastIndex = retList.size();
+		}else {
+			lastIndex = (int)pageUtil.get("limit")*(int)pageUtil.get("page");
+		}
+        PageResult pageResult = new PageResult(retList.subList((int)pageUtil.get("start"),lastIndex ), 
+        		retList.size(), pageUtil.getLimit(), pageUtil.getPage());
+        return pageResult;
+	}
 
 
 }

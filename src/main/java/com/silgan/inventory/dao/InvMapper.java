@@ -15,7 +15,7 @@ public interface InvMapper {
     Inv selectByPrimaryKey(Integer id);
 
     List<Inv> selectLocByMap(Map<String, Object> map);
-
+    
     int updateByPrimaryKey(Inv record);
 
     List<InvListVO> findInvList(PageQueryUtil pageUtil);
