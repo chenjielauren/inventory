@@ -50,7 +50,7 @@ public class InvController {
 		model.addAttribute("title", "库存交易");
 		UserRole u = userRoleService.getUser();
 		model.addAttribute("fullName", u.getFullName());		
-		model.addAttribute("itemList", itemService.selectItems());		
+		model.addAttribute("itemList", itemService.selectItems(0));		
         model.addAttribute("invList", invService.selectInvs());
         model.addAttribute("locList", invService.selectLocs()); 
         UserRole userRole = userRoleService.selectByUserName(u.getUserName());
@@ -70,7 +70,7 @@ public class InvController {
 		model.addAttribute("title", "库存交易查询");
 		UserRole u = userRoleService.getUser();;
 		model.addAttribute("fullName", u.getFullName());
-		model.addAttribute("itemList", itemService.selectItems());
+		model.addAttribute("itemList", itemService.selectItems(0));
         model.addAttribute("codeList", invService.findInvCodeList());
         List<Location> locList = invService.findLocationList();
         model.addAttribute("locList", locList);   
@@ -130,7 +130,7 @@ public class InvController {
         UserRole userRole = userRoleService.selectByUserName(u.getUserName());
     	String roleName= userRole.getRoleName();       	
     	model.addAttribute("userRole", roleName);    	
-    	model.addAttribute("itemList", itemService.selectItems());
+    	model.addAttribute("itemList", itemService.selectItems(0));
     	model.addAttribute("mpList", invService.selectMpList(u));
     	if(null!=roleName  &&( roleName.equals(Constant.ROLE_ADMIN)|| roleName.equals(Constant.ROLE_INV_ADD))) 
     		return "inventory/mp";
@@ -164,7 +164,8 @@ public class InvController {
 		model.addAttribute("title", "库存查询");
 		UserRole u = userRoleService.getUser();;
 		model.addAttribute("fullName", u.getFullName());
-		model.addAttribute("itemList", itemService.selectItems());
+//		Integer vmi = 0;
+		model.addAttribute("itemList", itemService.selectItems(0));
         model.addAttribute("codeList", invService.findInvCodeList());
         List<Location> locList = invService.findLocationList();
         model.addAttribute("locList", locList);   
@@ -185,7 +186,8 @@ public class InvController {
 		model.addAttribute("title", "库存查询");
 		UserRole u = userRoleService.getUser();;
 		model.addAttribute("fullName", u.getFullName());
-		model.addAttribute("itemList", itemService.selectItems());
+//		Integer vmi = 1;
+		model.addAttribute("itemList", itemService.selectItems(1));
         model.addAttribute("codeList", invService.findInvCodeList());
         List<Location> locList = invService.findLocationList();
         model.addAttribute("locList", locList);   

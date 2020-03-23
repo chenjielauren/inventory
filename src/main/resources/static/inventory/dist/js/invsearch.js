@@ -95,7 +95,7 @@ function search() {
     var startDate=$('#startDate').val();
     var endDate=$('#endDate').val();
     //数据封装
-    var searchData = {itemNumbers: itemNumbers,fromInv: fromInv,toInv: toInv,fromLoc: fromLoc,toLoc: toLoc,startDate: startDate,endDate: endDate};
+    var searchData = {itemNumbers: itemNumbers,fromInv: fromInv,toInv: toInv,fromLoc: fromLoc,toLoc: toLoc,startDate: startDate,endDate: endDate,vmi:0};
    
     //传入查询条件参数
     $("#jqGrid").jqGrid("setGridParam", {postData: searchData});

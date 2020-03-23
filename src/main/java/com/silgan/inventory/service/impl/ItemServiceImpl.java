@@ -116,10 +116,11 @@ public class ItemServiceImpl implements ItemService {
 	}
 
 	@Override
-	public String selectItems() {
+	public String selectItems(Integer vmi) {
 		Map<String,Object> map = new HashMap<String,Object>();
 		map.put("state", 1);
-		map.put("vmi", 0);//不需要VMIList
+		
+		map.put("vmi", vmi);//不需要VMIList
 		List<Item> itemList = itemMapper.selectItems(map);
 		return CommonUtil.convertListToJson(itemList);
 	}

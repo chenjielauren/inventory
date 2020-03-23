@@ -74,10 +74,10 @@ $(function () {
 
 function search() {
 	var itemNumber = $('#inputpicker-1').val();//获取Item值
-    var inv = $('#inv').val();
-    var loc = $('#loc').val();
+    var invName = $('#inv').val();
+    var locName = $('#loc').val();
     //数据封装
-    var searchData = {itemNumber: itemNumber,inv: inv,loc: loc,vmi:0};
+    var searchData = {itemNumber: itemNumber,invName: invName,locName: locName,vmi:0};
    
     //传入查询条件参数
     $("#jqGrid").jqGrid("setGridParam", {postData: searchData});

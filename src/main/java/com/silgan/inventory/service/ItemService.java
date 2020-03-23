@@ -26,7 +26,7 @@ public interface ItemService {
 
 	Boolean enableItem(Integer[] itemNumbers);
 
-	String selectItems();
+	String selectItems(Integer vmi);
 	
 	List<Unit> findUnitList();
 	

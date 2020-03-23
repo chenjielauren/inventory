@@ -64,7 +64,7 @@ $(function () {
             // (6)创建jqGrid对象  
             $("#" + subgrid_table_id).jqGrid({  
                 url: "/inventory/invs/list",  // (7)子表格数据对应的url
-                postData: { icNumber: keyValue },
+                postData: { icNumber: keyValue,vmi:1 },
                 datatype: "json",  
                 colModel: [       	
                   { label: '部件号', name: 'itemNumber', index: 'itemNumber',key: true, width: (pageWidth*(20/100)),
